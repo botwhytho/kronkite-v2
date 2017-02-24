@@ -1,0 +1,33 @@
+{
+    "name": "kronkite",
+    "version": "2.0.0",
+    "description": "Mobile app featuring trending topics in Google search and related news stories, trending YouTube videos and Spotify tracks.",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Sean T Taylor",
+    "license": "ISC",
+    "dependencies": {
+        "@webcomponents/custom-elements": "^1.0.0-alpha.3",
+        "babel": "^6.5.2",
+        "babel-core": "^6.11.4",
+        "babelify": "^6.1.0",
+        "chai": "^3.5.0",
+        "clarity-icons": "^0.8.7",
+        "clarity-ui": "^0.8.7",
+        "grunt": "^0.4.5",
+        "grunt-browserify": "^3.8.0",
+        "grunt-contrib-concat": "^0.5.1",
+        "grunt-contrib-copy": "^0.8.2",
+        "grunt-contrib-cssmin": "^0.14.0",
+        "grunt-contrib-jshint": "^1.0.0",
+        "grunt-contrib-uglify": "^0.11.0",
+        "jshint": "^2.9.2",
+        "jshint-stylish": "^2.1.0",
+        "load-grunt-config": "^0.19.1",
+        "mocha": "^2.5.3",
+        "mutationobserver-shim": "^0.3.2",
+        "time-grunt": "^1.4.0"
+    }
+}
