@@ -1,15 +1,15 @@
-/*--- router-service.js ---*/
+/*--- core.router-service.js ---*/
 
 /* globals Container, EJS, */
 
 Application.CORE["router-service"] = { 
 	templateEngine: (function() {
-		function render(route, container, params) {
+		function render(route, domContainer, container, params) {
 			var timer = setTimeout(()=> { showLoading() }, 1500);
 
 			if (container && route.controller) {
 				try { 
-					loadRoute(route, container, timer, params);	
+					loadRoute(route, domContainer, timer, container, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -26,21 +26,21 @@ Application.CORE["router-service"] = {
 			return;
 		}
 
-		function loadRoute(route, container, timer, params) {
+		function loadRoute(route, domContainer, timer, container, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, container, timer);
+				executeRoute(route, domContainer, container, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, container, timer, data);
+				executeRoute(route, domContainer, container, timer, data);
 			});
 			return;
 		}
 
-		function executeRoute(route, container, timer, data) {
-			renderTemplate(route.templateFilePath, container, data);
-			route.controller(data);
+		function executeRoute(route, domContainer, container, timer, data) {
+			renderTemplate(route.templateFilePath, domContainer, data);
+			route.controller(container.get("module-loader"), data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -57,14 +57,14 @@ Application.CORE["router-service"] = {
 		}
 
 		return {render}
-	}),
+	}()),
 	routeTable: [
 		{
-			path: "/login",
-			templateFilePath: null,
+			path: "/",
+			templateFilePath: "index.ejs",
 			resolve: null,
-			controller: function(data) {
-				
+			controller: function(moduleLoader, data) {
+				moduleLoader.start(["articles-feed"]);
 			}
 		},
 		{

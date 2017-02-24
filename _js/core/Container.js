@@ -1,3 +1,4 @@
+/*--- Container.js ---*/
 
 Application.Container = function(core, module_selector) { 
                    	

@@ -1,4 +1,4 @@
-/* factory.application.js */
+/*--- Application.js ---*/
 
 Application.CORE = {};
 Application.CORE.base = {};

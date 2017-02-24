@@ -3,7 +3,12 @@
 Application.CORE["module-loader"] = (function(CORE) { 
 	var stagedModules; 
 	
-	function start(moduleID) { 
+	function start(modules) {
+		stagedModules = CORE["module-registry"].stagedModules;
+		modules.forEach((module) => {
+			stagedModules[module]();
+		}); 
+		return
 		 
 	} 
 		

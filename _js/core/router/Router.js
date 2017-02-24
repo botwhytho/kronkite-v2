@@ -3,11 +3,10 @@
 
 Application.modules.router = function (container) {
 	function Router({routeTable, templateDirectory, templateEngine}) {
-		var routes = {},
-		templateDir;
+		var routes = {};
 
 		function router() {
-		 	var container = "view-container",
+		 	var domContainer = "template-container",
 		 	url = location.hash.slice(1) || "/",
 		 	render = templateEngine.render,
 		 	baseUrl = stripParams(url),
@@ -17,7 +16,7 @@ Application.modules.router = function (container) {
 		   	if (validateRoute(baseUrl) === false) { 		
 			   	return;
 		   	} else {
-				render(route, container, params);
+				render(route, domContainer, container, params);
 			} 
 
 			return;	
@@ -26,7 +25,7 @@ Application.modules.router = function (container) {
 		function regRoute(path, templateFilePath, controller, resolve, authRequired) {
 			routes[path] = {	
 				path: path,
-				templateFilePath: templateDir + templateFilePath,
+				templateFilePath: templateDirectory + templateFilePath,
 				controller: controller,
 				resolve: resolve,
 				authRequired: authRequired 
@@ -36,7 +35,7 @@ Application.modules.router = function (container) {
 		}
 		
 		function validateRoute(url) {
-			if (this[url] === undefined) {
+			if (routes[url] === undefined) {
 			   	console.error("ROUTER ERROR: current route '" +
 			   	url + "' not defined.");
 			   	return false;
@@ -72,6 +71,7 @@ Application.modules.router = function (container) {
 		window.addEventListener("hashchange", router);  
 
 		routeTable.forEach(function(route) {
+
 			regRoute(route.path, 
 				route.templateFilePath, 
 				route.controller, 
@@ -79,18 +79,16 @@ Application.modules.router = function (container) {
 				route.authRequired
 			);
 		});
-
 		return 
 	}
 
 	function start() {
 		var routerSupport = container.get("router-service");
 
-		console.log("starting Router...", {container, routerSupport});
 		new Router({
 			routeTable: routerSupport.routeTable,
 			templateEngine: routerSupport.templateEngine,
-			templateDirectory: "./views"
+			templateDirectory: "./views/"
 		});
 	}
 
