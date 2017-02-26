@@ -4,12 +4,12 @@
 
 Application.CORE["router-service"] = { 
 	templateEngine: (function() {
-		function render(route, domContainer, container, params) {
+		function render(route, container, SANDBOX, params) {
 			var timer = setTimeout(()=> { showLoading() }, 1500);
 
 			if (container && route.controller) {
 				try { 
-					loadRoute(route, domContainer, timer, container, params);	
+					loadRoute(route, container, timer, SANDBOX, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -26,21 +26,21 @@ Application.CORE["router-service"] = {
 			return;
 		}
 
-		function loadRoute(route, domContainer, timer, container, params) {
+		function loadRoute(route, container, timer, SANDBOX, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, domContainer, container, timer);
+				executeRoute(route, container, SANDBOX, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, domContainer, container, timer, data);
+				executeRoute(route, container, SANDBOX, timer, data);
 			});
 			return;
 		}
 
-		function executeRoute(route, domContainer, container, timer, data) {
-			renderTemplate(route.templateFilePath, domContainer, data);
-			route.controller(container.get("module-loader"), data);
+		function executeRoute(route, container, SANDBOX, timer, data) {
+			renderTemplate(route.templateFilePath, container, data);
+			route.controller(SANDBOX.get(["module-loader"]), data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -64,7 +64,7 @@ Application.CORE["router-service"] = {
 			templateFilePath: "index.ejs",
 			resolve: null,
 			controller: function(moduleLoader, data) {
-				moduleLoader.start(["articles-feed"]);
+				moduleLoader.start(["articles-feed"])();
 			}
 		},
 		{

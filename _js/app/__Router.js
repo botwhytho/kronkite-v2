@@ -1,7 +1,7 @@
 /*--- Router.js
  * Configures and bootstraps the router. ---*/
 
-Application.modules.router = function (container) {
+Application.modules.router = function (SANDBOX) {
 	function Router({routeTable, templateDirectory, templateEngine}) {
 		var routes = {};
 
@@ -16,7 +16,7 @@ Application.modules.router = function (container) {
 		   	if (validateRoute(baseUrl) === false) { 		
 			   	return;
 		   	} else {
-				render(route, domContainer, container, params);
+				render(route, domContainer, SANDBOX, params);
 			} 
 
 			return;	
@@ -82,8 +82,8 @@ Application.modules.router = function (container) {
 		return 
 	}
 
-	function start() {
-		var routerSupport = container.get("router-service");
+	function start(args) {
+		var routerSupport = SANDBOX.get(["router-service"]);
 
 		new Router({
 			routeTable: routerSupport.routeTable,
@@ -92,7 +92,7 @@ Application.modules.router = function (container) {
 		});
 	}
 
-	container.get("module-registry").register("router", start);
+	SANDBOX.get(["module-registry"]).register("router", start);
 	return;
 }
 

@@ -4,21 +4,24 @@ Application.CORE["module-loader"] = (function(CORE) {
 	var stagedModules; 
 	
 	function start(modules) {
-		stagedModules = CORE["module-registry"].stagedModules;
-		modules.forEach((module) => {
-			stagedModules[module]();
-		}); 
-		return
-		 
+		return function(args) {
+			stagedModules = CORE["module-registry"].stagedModules;
+			modules.forEach((module) => {
+				stagedModules[module](args);
+			}); 
+			return;
+		}
 	} 
-		
-	function startALL() { 
+	
+	function startALL(args) { 
 		stagedModules = CORE["module-registry"].stagedModules;
 		for (module in stagedModules) {
-			stagedModules[module]();
+			stagedModules[module](args);
 		}	
+		
 		return;	
-	}
+	}	
+	
 
 	function stop(moduleID) { 
 		

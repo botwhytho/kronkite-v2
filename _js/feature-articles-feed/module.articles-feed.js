@@ -1,15 +1,13 @@
 /*--- module.articles-feed.js ---*/
 
 
-Application.modules.articlesFeed = function (container) {
+Application.modules.articlesFeed = function (SANDBOX) {
 	
-	function start() {
+	function start(args) {
 		console.log("starting articles-feed...")
-		var routerSupport = container.get("router-service");
-
-		
+	
 	}
 
-	container.get("module-registry").register("articles-feed", start);
+	SANDBOX.get(["module-registry"]).register("articles-feed", start);
 	return;
 }

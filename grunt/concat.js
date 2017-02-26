@@ -1,6 +1,6 @@
 module.exports = {
         debug: {
-                src: ["./_js/core/**", 
+                src: ["./_js/app/**", 
                 	"./_js/base/**", 
                 	"./_js/feature-articles-feed/**", 
                 	"./_js/start.js" 

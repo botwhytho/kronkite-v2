@@ -7,7 +7,7 @@ Application.modules = {};
 function Application() {
 	var args = Array.prototype.slice.call(arguments),
 	callback = args.pop(),
-	container = new Application.Container(Application.CORE),
+	SANDBOX = new Application.Sandbox(Application.CORE),
 	modules = (args[0] && typeof args[0] === "string") ? args : args[0],
 	i;
 
@@ -28,7 +28,7 @@ function Application() {
 	// initialize required modules
 	for (i = 0; i < modules.length; i += 1) {
 		try {
-			Application.modules[modules[i]](container); 
+			Application.modules[modules[i]](SANDBOX); 
 
 		} catch(e) {
 			console.error({
@@ -39,5 +39,5 @@ function Application() {
 		}
 	}
 
-	callback(container); 
+	callback(SANDBOX); 
 }

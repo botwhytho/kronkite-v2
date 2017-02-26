@@ -8,7 +8,7 @@ Application.modules = {};
 function Application() {
 	var args = Array.prototype.slice.call(arguments),
 	callback = args.pop(),
-	container = new Application.Container(Application.CORE),
+	SANDBOX = new Application.Sandbox(Application.CORE),
 	modules = (args[0] && typeof args[0] === "string") ? args : args[0],
 	i;
 
@@ -29,7 +29,7 @@ function Application() {
 	// initialize required modules
 	for (i = 0; i < modules.length; i += 1) {
 		try {
-			Application.modules[modules[i]](container); 
+			Application.modules[modules[i]](SANDBOX); 
 
 		} catch(e) {
 			console.error({
@@ -40,104 +40,13 @@ function Application() {
 		}
 	}
 
-	callback(container); 
+	callback(SANDBOX); 
 }
-
-/*--- Container.js ---*/
-
-Application.Container = function(core, module_selector) { 
-                   	
-	function notify(evt) { 
-		if(core.is_obj(evt) && evt.type) { 
-			core.triggerEvent(evt); 
-		} 
-	}
-
-	function listen(evts) { 
-		core.registerEvents(evts, module_selector); 
-	}
-
-	function ignore(evts) { 
-		if (core.is_arr(evts)) { 
-			core.removeEvents(evts, module_selector); 
-		}          
-	}
-
-	function get(dependency) {
-		return core[dependency];
-	}
-
-        return {notify, listen, ignore, get}; 
-	     
-};
-
-/*--- core.module-loader.js ---*/
-
-Application.CORE["module-loader"] = (function(CORE) { 
-	var stagedModules; 
-	
-	function start(modules) {
-		stagedModules = CORE["module-registry"].stagedModules;
-		modules.forEach((module) => {
-			stagedModules[module]();
-		}); 
-		return
-		 
-	} 
-		
-	function startALL() { 
-		stagedModules = CORE["module-registry"].stagedModules;
-		for (module in stagedModules) {
-			stagedModules[module]();
-		}	
-		return;	
-	}
-
-	function stop(moduleID) { 
-		
-	} 
-		
-	function stopALL() { 
-		
-	}
-		 	
- 	return {start, stop, startALL, stopALL}
-
-}).call(null, Application.CORE);
-
-/*--- core.module-registry.js ---*/
-
-Application.CORE["module-registry"] = (function(mode) { 
-    var stagedModules = {}; 
-  
- 	(function debug(mode) { 
-	   if (mode === "debug") {
-	   	console.warn("DEBUG mode ENABLED. API calls routed to localhost.")
-	   }
-	}()); 
-	
-	function register(moduleName, startFn) {
-		stagedModules[moduleName] = startFn;
-		return;
-	}
-			
-	function registerEvents(evts, mod) { 
-		
-	}
-
-	function dispatchEvent(evt) { 
-		
-	} 
-	 	
- 	return {register, registerEvents, dispatchEvent, stagedModules}
-
-}("debug"));
-
 
 /*--- Router.js
  * Configures and bootstraps the router. ---*/
 
-Application.modules.router = function (container) {
+Application.modules.router = function (SANDBOX) {
 	function Router({routeTable, templateDirectory, templateEngine}) {
 		var routes = {};
 
@@ -152,7 +61,7 @@ Application.modules.router = function (container) {
 		   	if (validateRoute(baseUrl) === false) { 		
 			   	return;
 		   	} else {
-				render(route, domContainer, container, params);
+				render(route, domContainer, SANDBOX, params);
 			} 
 
 			return;	
@@ -218,8 +127,8 @@ Application.modules.router = function (container) {
 		return 
 	}
 
-	function start() {
-		var routerSupport = container.get("router-service");
+	function start(args) {
+		var routerSupport = SANDBOX.get(["router-service"]);
 
 		new Router({
 			routeTable: routerSupport.routeTable,
@@ -228,11 +137,140 @@ Application.modules.router = function (container) {
 		});
 	}
 
-	container.get("module-registry").register("router", start);
+	SANDBOX.get(["module-registry"]).register("router", start);
 	return;
 }
 
 
+
+/*--- Sandbox.js ---*/
+
+Application.Sandbox = function(core, module_selector) { 
+                   	
+	function notify(evt) { 
+		if(core.is_obj(evt) && evt.type) { 
+			core.triggerEvent(evt); 
+		} 
+	}
+
+	function listen(evts) { 
+		core.registerEvents(evts, module_selector); 
+	}
+
+	function ignore(evts) { 
+		if (core.is_arr(evts)) { 
+			core.removeEvents(evts, module_selector); 
+		}          
+	}
+
+	function get(modules) {
+		if (modules.length === 1) {
+    			return core[modules[0]];
+    		}
+
+		return modules.reduce(function(moduleObject, nextModule) {
+    			moduleObject[nextModule] = core[nextModule];
+       			return moduleObject;
+    		},{});
+	}
+
+        return {notify, listen, ignore, get}; 
+	     
+};
+
+/*--- core.ajax-provider.js ---*/
+
+Application.CORE["ajax-provider"] = (function() { 
+
+	function onChange(xhr) {
+		if (xhr.status === 200) {
+		        this.resolve(JSON.parse(xhr.responseText));
+		} else {
+			var errorObject = {
+				response: JSON.parse(xhr.responseText),
+				xhr
+			};
+			console.error(errorObject);
+			this.reject(errorObject);
+		}
+	}
+
+	function ajaxProvider({url, data, method, async}) {
+		console.log("preparing AJAX request...", {url, data, method, async});
+
+		var promise = new Promise(function(resolve, reject) {
+			var xhr = new XMLHttpRequest(),
+			responseData;
+
+			xhr.open(method, url, async); 
+			xhr.send(data); 
+			xhr.onreadystatechange = onChange.bind({resolve, reject})		
+		});	
+
+		return promise;
+	}
+
+	return {ajaxProvider}
+}());
+
+/*--- core.module-loader.js ---*/
+
+Application.CORE["module-loader"] = (function(CORE) { 
+	var stagedModules; 
+	
+	function start(modules) {
+		return function(args) {
+			stagedModules = CORE["module-registry"].stagedModules;
+			modules.forEach((module) => {
+				stagedModules[module](args);
+			}); 
+			return;
+		}
+	} 
+	
+	function startALL(args) { 
+		stagedModules = CORE["module-registry"].stagedModules;
+		for (module in stagedModules) {
+			stagedModules[module](args);
+		}	
+		
+		return;	
+	}	
+	
+
+	function stop(moduleID) { 
+		
+	} 
+		
+	function stopALL() { 
+		
+	}
+		 	
+ 	return {start, stop, startALL, stopALL}
+
+}).call(null, Application.CORE);
+
+/*--- core.module-registry.js ---*/
+
+Application.CORE["module-registry"] = (function() { 
+    var stagedModules = {}; 
+  	
+	function register(moduleName, startFn) {
+		stagedModules[moduleName] = startFn;
+		return;
+	}
+			
+	function registerEvents(evts, mod) { 
+		
+	}
+
+	function dispatchEvent(evt) { 
+		
+	} 
+	 	
+ 	return {register, registerEvents, dispatchEvent, stagedModules}
+
+}());
 
 /*--- core.router-service.js ---*/
 
@@ -240,12 +278,12 @@ Application.modules.router = function (container) {
 
 Application.CORE["router-service"] = { 
 	templateEngine: (function() {
-		function render(route, domContainer, container, params) {
+		function render(route, container, SANDBOX, params) {
 			var timer = setTimeout(()=> { showLoading() }, 1500);
 
 			if (container && route.controller) {
 				try { 
-					loadRoute(route, domContainer, timer, container, params);	
+					loadRoute(route, container, timer, SANDBOX, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -262,21 +300,21 @@ Application.CORE["router-service"] = {
 			return;
 		}
 
-		function loadRoute(route, domContainer, timer, container, params) {
+		function loadRoute(route, container, timer, SANDBOX, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, domContainer, container, timer);
+				executeRoute(route, container, SANDBOX, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, domContainer, container, timer, data);
+				executeRoute(route, container, SANDBOX, timer, data);
 			});
 			return;
 		}
 
-		function executeRoute(route, domContainer, container, timer, data) {
-			renderTemplate(route.templateFilePath, domContainer, data);
-			route.controller(container.get("module-loader"), data);
+		function executeRoute(route, container, SANDBOX, timer, data) {
+			renderTemplate(route.templateFilePath, container, data);
+			route.controller(SANDBOX.get(["module-loader"]), data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -300,7 +338,7 @@ Application.CORE["router-service"] = {
 			templateFilePath: "index.ejs",
 			resolve: null,
 			controller: function(moduleLoader, data) {
-				moduleLoader.start(["articles-feed"]);
+				moduleLoader.start(["articles-feed"])();
 			}
 		},
 		{
@@ -330,6 +368,79 @@ Application.CORE["router-service"] = {
 	]
 }
 
+/*--- core.url-provider.js ---*/
+
+Application.CORE["url-provider"] = (function() { 
+	var currentEnvironment,
+	route,
+	endpointMap = {
+		search: "/trending-search",
+		videos: "/trending-videos",
+		music: "/trending-music"
+	}
+
+	function setEnvironment({environment, routeMap, remoteDebug}) {
+		console.log("setting environment...", {environment, routeMap, remoteDebug});
+		
+		setRoute({environment, routeMap, remoteDebug}); 
+		currentEnvironment = environment;
+		return;
+	}
+
+	function setRoute({environment, routeMap, remoteDebug}) {
+		if (!remoteDebug && environment === "debug") {
+			route = routeMap.debug;
+		} else if (remoteDebug && environment === "debug") {
+			route = routeMap.remoteDebug;
+		} else {
+			route = routeMap.production;
+		}
+		return;
+	}
+	
+	function setAPIURL(endpoint) {
+		return route + endpointMap[endpoint];
+	}
+		 	
+ 	return {setEnvironment, setAPIURL}
+
+})();
+
+
+/*--- module.config.js ---*/
+
+Application.modules.config = function (SANDBOX) {
+	
+	function setEnvironment(config) {
+		if (config.environment === "debug" || config.environment === "remoteDebug" ) {
+	   		console.warn("DEBUG mode ENABLED. API calls routed to localhost.");
+	   	}
+
+		SANDBOX.get(["url-provider"]).setEnvironment(config);
+		return;
+	}
+
+	function startErrorReporter() {
+		window.addEventListener("error", function(e) {
+			var stack = e.error.stack;
+			var message = e.error.toString();
+			
+			if (stack) {message += '\n' + stack;}
+			console.error({message, stack});
+		});
+		return;
+	};
+	
+	function start(args) {
+		startErrorReporter();
+		setEnvironment(args);
+	
+	}
+
+	SANDBOX.get(["module-registry"]).register("config", start);
+	return;
+}
+
 
 
 
@@ -338,23 +449,31 @@ Application.CORE.base.EJS = (function(){var rsplit=function(string,regex){var re
 /*--- module.articles-feed.js ---*/
 
 
-Application.modules.articlesFeed = function (container) {
+Application.modules.articlesFeed = function (SANDBOX) {
 	
-	function start() {
-		console.log("starting articles-feed...")
-		var routerSupport = container.get("router-service");
+	function start(args) {
+		console.log("starting articles-feed...", args)
+		var routerSupport = SANDBOX.get(["router-service"]);
 
 		
 	}
 
-	container.get("module-registry").register("articles-feed", start);
+	SANDBOX.get(["module-registry"]).register("articles-feed", start);
 	return;
 }
 /*--- start.js ---*/
 
-new Application(function(container) {
-	console.log("starting new application...")
-	
-	container.get("module-loader").start(["router"]);
+new Application(function(SANDBOX) {
+	console.log("starting application...")
+
+	SANDBOX.get(["module-loader"]).start(["router", "config"])({
+		environment: "debug",
+		remoteDebug: false,
+		routeMap: {
+			debug: "http://localhost:8080/",
+			remoteDebug: "http://192.168.254.4:8080/",
+			production: "http://kronkite-server.herokuapp.com"
+		} 
+	});
 });
 

@@ -1,6 +1,6 @@
-/*--- Container.js ---*/
+/*--- Sandbox.js ---*/
 
-Application.Container = function(core, module_selector) { 
+Application.Sandbox = function(core, module_selector) { 
                    	
 	function notify(evt) { 
 		if(core.is_obj(evt) && evt.type) { 
@@ -18,8 +18,15 @@ Application.Container = function(core, module_selector) {
 		}          
 	}
 
-	function get(dependency) {
-		return core[dependency];
+	function get(modules) {
+		if (modules.length === 1) {
+    			return core[modules[0]];
+    		}
+
+		return modules.reduce(function(moduleObject, nextModule) {
+    			moduleObject[nextModule] = core[nextModule];
+       			return moduleObject;
+    		},{});
 	}
 
         return {notify, listen, ignore, get}; 
