@@ -483,7 +483,7 @@ Application.modules.articlesFeed = function (SANDBOX) {
 /*--- start.js ---*/
 
 new Application(function(SANDBOX) {
-	console.log("starting application...")
+	console.log("starting application...");
 
 	SANDBOX.get(["module-loader"]).start(["router", "config"])({
 		environment: "debug",
