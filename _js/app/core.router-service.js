@@ -2,10 +2,23 @@
 
 /* globals Container, EJS, */
 
-Application.CORE["router-service"] = { 
-	templateEngine: (function() {
+Application.CORE["router-service"] = (function(CORE) {
+
+	function fetchTrendingSearches() {
+		var url = CORE["url-provider"].setAPIURL("search"),
+		ajaxProvider = CORE["ajax-provider"];
+
+		return ajaxProvider({url, async: true}).then(function({data}) {
+			//console.log("response data:", data.rss.channel[0].item);
+			return data.rss.channel[0].item;
+		});
+	}
+
+	return { 
+
+		templateEngine: (function() {
 		function render(route, container, SANDBOX, params) {
-			var timer = setTimeout(()=> { showLoading() }, 1500);
+			var timer = setTimeout(()=> { showLoading() }, 2500);
 
 			if (container && route.controller) {
 				try { 
@@ -33,8 +46,8 @@ Application.CORE["router-service"] = {
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, container, SANDBOX, timer, data);
-			});
+				executeRoute(route, container, SANDBOX, timer, data)
+			}).catch((error) => {throw error});
 			return;
 		}
 
@@ -52,7 +65,7 @@ Application.CORE["router-service"] = {
 		}
 
 		function hideLoading() {
-			console.warn("FINISHED LOADING.");
+			//console.warn("FINISHED LOADING.");
 			return;
 		}
 
@@ -62,7 +75,7 @@ Application.CORE["router-service"] = {
 		{
 			path: "/",
 			templateFilePath: "index.ejs",
-			resolve: null,
+			resolve: fetchTrendingSearches,
 			controller: function(moduleLoader, data) {
 				moduleLoader.start(["articles-feed"])();
 			}
@@ -91,5 +104,7 @@ Application.CORE["router-service"] = {
 
 			}
 		}
-	]
-}
+	]}
+
+}).call(null, Application.CORE)
+	

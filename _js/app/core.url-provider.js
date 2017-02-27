@@ -4,9 +4,9 @@ Application.CORE["url-provider"] = (function() {
 	var currentEnvironment,
 	route,
 	endpointMap = {
-		search: "/trending-search",
-		videos: "/trending-videos",
-		music: "/trending-music"
+		search: "trending-search",
+		videos: "trending-videos",
+		music: "trending-music"
 	}
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {

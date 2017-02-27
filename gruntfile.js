@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 
 	grunt.registerTask("STAGE", [
 		"concat",
-		//"cssmin",
+		"cssmin",
 		"copy"
 		]); 
 	grunt.registerTask("BUILD", [
