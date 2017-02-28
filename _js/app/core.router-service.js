@@ -9,7 +9,6 @@ Application.CORE["router-service"] = (function(CORE) {
 		ajaxProvider = CORE["ajax-provider"];
 
 		return ajaxProvider({url, async: true}).then(function({data}) {
-			//console.log("response data:", data.rss.channel[0].item);
 			return data.rss.channel[0].item;
 		});
 	}
@@ -30,8 +29,11 @@ Application.CORE["router-service"] = (function(CORE) {
 			return;
 		}
 
-		function renderTemplate(pathToPartial, containerId, templateData) {
+		function renderTemplate(pathToPartial, containerId, templateData, middleware) {
+
 			if (pathToPartial.includes("null")) { return; }
+
+			if (middleware) { middleware(); }
 
 			var template = new EJS({url: pathToPartial}).render(
 			containerId, {data: templateData});
@@ -52,7 +54,7 @@ Application.CORE["router-service"] = (function(CORE) {
 		}
 
 		function executeRoute(route, container, SANDBOX, timer, data) {
-			renderTemplate(route.templateFilePath, container, data);
+			renderTemplate(route.templateFilePath, container, data, route.middleware);
 			route.controller(SANDBOX.get(["module-loader"]), data);
 			clearTimeout(timer);
 			hideLoading();
@@ -75,14 +77,16 @@ Application.CORE["router-service"] = (function(CORE) {
 		{
 			path: "/",
 			templateFilePath: "index.ejs",
+			middleware: CORE["router-middleware"]["/"],
 			resolve: fetchTrendingSearches,
 			controller: function(moduleLoader, data) {
 				moduleLoader.start(["articles-feed"])();
 			}
 		},
 		{
-			path: "/main-menu",
-			templateFilePath: "main-menu-view.ejs",
+			path: "/article",
+			templateFilePath: "article-view.ejs",
+			middleware: CORE["router-middleware"]["/article"],
 			resolve: null,
 			controller: function(data) {
 				

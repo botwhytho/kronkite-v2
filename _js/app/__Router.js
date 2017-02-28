@@ -2,7 +2,7 @@
  * Configures and bootstraps the router. ---*/
 
 Application.modules.router = function (SANDBOX) {
-	function Router({routeTable, templateDirectory, templateEngine}) {
+	function Router({routeTable, templateDirectory, templateEngine, middleware}) {
 		var routes = {};
 
 		function router() {
@@ -13,21 +13,22 @@ Application.modules.router = function (SANDBOX) {
 		 	params = getParams(url),
 		 	route = routes[baseUrl];
 
-		   	if (validateRoute(baseUrl) === false) { 		
+		   	if (validateRoute(baseUrl) === false) { 	
 			   	return;
 		   	} else {
-				render(route, domContainer, SANDBOX, params);
+				render(route, domContainer, SANDBOX, params, middleware);
 			} 
 
 			return;	
 		}
 
-		function regRoute(path, templateFilePath, controller, resolve, authRequired) {
+		function regRoute(path, templateFilePath, controller, resolve, middleware, authRequired) {
 			routes[path] = {	
 				path: path,
 				templateFilePath: templateDirectory + templateFilePath,
 				controller: controller,
 				resolve: resolve,
+				middleware: middleware,
 				authRequired: authRequired 
 			};
 
@@ -76,6 +77,7 @@ Application.modules.router = function (SANDBOX) {
 				route.templateFilePath, 
 				route.controller, 
 				route.resolve,
+				route.middleware,
 				route.authRequired
 			);
 		});

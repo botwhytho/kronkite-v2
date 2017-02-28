@@ -3,8 +3,8 @@ module.exports = function (grunt) {
 	require("time-grunt")(grunt);
 
 	grunt.registerTask("STAGE", [
-		"concat",
 		"cssmin",
+		"concat",
 		"copy"
 		]); 
 	grunt.registerTask("BUILD", [

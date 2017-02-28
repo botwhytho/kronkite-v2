@@ -3,7 +3,7 @@
 	<section class="row row-custom">
 
 		<div class="col-lg-5 col-md-8 col-sm-12 col-xs-12">
-			<% data.forEach(function(item)  { %>
+			<% data.forEach(function(item, index)  { %>
 				<section class="card">
 					<div class="card-header card-header-custom"><%=item["ht:approx_traffic"][0]%> searches
 				</div><!-- .card-header -->
@@ -25,7 +25,8 @@
 				</div><!-- .card-block -->
 
 				<div class="card-footer">
-					<button class="btn btn-sm btn-link"><%=item["ht:news_item"][0]["ht:news_item_source"][0]%></button>
+					<a href="#/article?id=<%=index%>" <button class="btn btn-sm">Read More</button></a>
+					<span style="float: right; font-weight: 600;"><%=item["ht:news_item"][0]["ht:news_item_source"][0]%></span>
 				</div>
 
 			</section><!-- .card -->
