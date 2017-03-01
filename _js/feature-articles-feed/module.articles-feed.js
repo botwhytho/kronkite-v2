@@ -4,25 +4,29 @@
 
 Container.modules["articles-feed"] = function(APP) {
 	var Model,
-	articlesList;
+	articlesList,
+	eventList = [
+		{event: "check-has-articles", action: checkHasArticles},
+		{event: "get-cached-articles", 	action: getCachedArticles}
+	];
 
 	function findArticle(id) {
 		return articlesList.getModel()[id];
 	}
 
-	function checkHasArticles() {
+	function checkHasArticles(args) {
 		return articlesList.getModel().length !== 0;
 	}
 
-	function getCachedFeed() {
+	function getCachedArticles() {
+		console.log("getting cached articles!")
 		return articlesList.getModel();
 	}
 
 	function start(currentFeed) {
-		console.log("starting articles feed...");
 		Model = APP.require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
-		//CORE.listen("check-articles-feed", fn);
+		APP.broadcast.listen(eventList);
 		return;
 	}
 

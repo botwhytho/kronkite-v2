@@ -232,11 +232,12 @@ Container.modules.router = function(APP) {
 	}
 
 	function start(args) {
-		var routerSupport = APP.require(["router-service"]);
+		var routerSupport = APP.require(["router-service", 
+			"route-table"]);
 
 		new Router({
-			routeTable: routerSupport.routeTable,
-			templateEngine: routerSupport.templateEngine,
+			routeTable: routerSupport["route-table"],
+			templateEngine: routerSupport["router-service"],
 			templateDirectory: "./views/"
 		});
 	}
@@ -291,24 +292,30 @@ Container.modules["ajax-provider"] = function(APP) {
 /*globals Container */
 
 Container.modules.broadcast = function(APP) { 
+	var eventManifest = {};
+
+	function sendNotifications(data) {
+		return function(resultObj, eventName) {
+			resultObj[eventName] = this[eventName](data);
+			return resultObj;
+		}
+	}
 	
-	function notify(evt) { 
-		/*if(core.is_obj(evt) && evt.type) { 
-			core.triggerEvent(evt); 
-		} */
+	function notify(eventList) {
+		return function(data) {
+			return eventList.reduce(sendNotifications(data).bind(eventManifest), {});
+		} 
 	}
 
-	function listen(evts) { 
-		//core.registerEvents(evts, module_selector); 
-	}
 
-	function ignore(evts) { 
-		/*if (core.is_arr(evts)) { 
-			core.removeEvents(evts, module_selector); 
-		} */         
+	function listen(eventArray) { 
+		eventArray.forEach(function(eventObj) {
+			eventManifest[eventObj.event] = eventObj.action;
+		});
+		return;
 	}
-
-	APP.broadcast = {notify, listen, ignore};
+	
+	APP.broadcast = {notify, listen};
 };
 
 /*--- module.config.js ---*/
@@ -368,7 +375,7 @@ Container.modules.config = function(APP) {
 
 /*globals Container */
 
-Container.modules["module-loader"] = function(APP) { 
+/*Container.modules["module-loader"] = function(APP) { 
 	var stagedModules; 
 	
 	function start(modules) {
@@ -401,7 +408,7 @@ Container.modules["module-loader"] = function(APP) {
 		 
 	APP["module-loader"] = {start, stop, startALL, stopALL};
 	return;
-};
+};*/
 
 /*--- core.module-registry.js ---*/
 
@@ -425,6 +432,84 @@ Container.modules["module-loader"] = function(APP) {
 	return;
 }*/
 
+/*--- core.resolve-map.js ---*/
+
+Container.modules["resolve-map"] = function(APP) {
+
+	function getCachedArticles(hasArticles) {
+		if (hasArticles) {
+			var data = APP.broadcast.notify(["get-cached-articles"])()["get-cached-articles"]
+
+			return Promise.resolve(data);
+		} 
+	}
+
+	function fetchTrendingSearches() {
+		var url = APP["url-provider"].setAPIURL("search"),
+		ajaxProvider = APP["ajax-provider"];
+
+		function onFeedResponse({data}) {
+			return data.rss.channel[0].item;
+		}
+
+		try {
+			return getCachedArticles(APP.broadcast.notify(["check-has-articles"])());
+		} catch(e) {
+			//console.error(e);
+			return ajaxProvider({url}).then(onFeedResponse);
+		} 
+	}
+
+	APP["resolve-map"] = {fetchTrendingSearches}
+	return;
+}
+
+/*--- core.route-table.js ---*/
+
+Container.modules["route-table"] = function(APP) {
+
+	APP["route-table"] = [
+		{
+			path: "/",
+			templateFilePath: "index.ejs",
+			middleware: function() { 
+				APP["router-middleware"]["/"]();
+			},
+			resolve: APP.require(["resolve-map"]).fetchTrendingSearches,
+			controller: function(moduleLoader, data) {
+				APP.start(["articles-feed"])(data);
+			}
+		},
+		{
+			path: "/article",
+			templateFilePath: "article-view.ejs",
+			middleware: function(){
+				APP["router-middleware"]["/article"]();	
+			},
+			resolve: null,
+			controller: function(data) {
+				
+			}
+		},
+		{
+			path: "/lunch-order",
+			templateFilePath: "lunch-order-view.ejs",
+			resolve: null,
+			controller: function(data) {
+							
+			}
+		},
+		{
+			path: "/orders-view",
+			templateFilePath: "orders-view.ejs",
+			resolve: null,
+			controller: function(data) {
+
+			}
+		}
+	]
+	return;
+}
 /*--- core.router-middleware.js ---*/
 
 /*globals Container */
@@ -473,18 +558,7 @@ Container.modules["router-middleware"] = function(APP) {
 
 Container.modules["router-service"] = function(APP) {
 
-	function fetchTrendingSearches() {
-		//APP.require(["url-provider, ajax-provider, broadcast"])
-		var url = APP["url-provider"].setAPIURL("search"),
-		ajaxProvider = APP["ajax-provider"];
-				
-		return ajaxProvider({url, async: true}).then(function({data}) {
-			return data.rss.channel[0].item;
-		});
-	}
-
-	APP["router-service"] = { 
-		templateEngine: (function() {
+	APP["router-service"] = (function() {
 		function render(route, container, APP, params) {
 			var timer = setTimeout(()=> { showLoading(); }, 2500);
 
@@ -542,43 +616,8 @@ Container.modules["router-service"] = function(APP) {
 		}
 
 		return {render};
-	}()),
-	routeTable: [
-		{
-			path: "/",
-			templateFilePath: "index.ejs",
-			middleware: APP["router-middleware"]["/"],
-			resolve: fetchTrendingSearches,
-			controller: function(moduleLoader, data) {
-				APP.start(["articles-feed"])(data);
-			}
-		},
-		{
-			path: "/article",
-			templateFilePath: "article-view.ejs",
-			middleware: APP["router-middleware"]["/article"],
-			resolve: null,
-			controller: function(data) {
-				
-			}
-		},
-		{
-			path: "/lunch-order",
-			templateFilePath: "lunch-order-view.ejs",
-			resolve: null,
-			controller: function(data) {
-							
-			}
-		},
-		{
-			path: "/orders-view",
-			templateFilePath: "orders-view.ejs",
-			resolve: null,
-			controller: function(data) {
-
-			}
-		}
-	]};
+	}())
+	
 	return;
 };
 	
@@ -621,35 +660,6 @@ Container.modules["url-provider"] = function(APP) {
 	return;
 };
 
-/*--- start-container.js ---*/
-
-/*function startContainer({requiredModules, init, container,         enclosingContainer}) {
-        
-        if (requiredModules.length === 0) {return;}
-
-        if (!requiredModules || requiredModules[0] === "*") {
-            requiredModules = [];
-            for (i in container.modules) {
-                if (container.modules.hasOwnProperty(i)) {
-                    requiredModules.push(i); 
-                }
-            } 
-        }
-        
-    	for (i = 0; i < requiredModules.length; i++) {
-    		try {
-    			container.modules[requiredModules[i]](container, enclosingContainer);
-    		} catch(e) {
-    			console.error({
-				error: e, 
-				module: requiredModules[i],
-				ContainerModules: container.modules
-			});
-    		}
-    	}
-    init(container);
-}*/
-
 
 
 /*! jQuery v2.1.1 -css,-css/addGetHookIf,-css/curCSS,-css/defaultDisplay,-css/hiddenVisibleSelectors,-css/support,-css/swap,-css/var/cssExpand,-css/var/getStyles,-css/var/isHidden,-css/var/rmargin,-css/var/rnumnonpx,-effects,-effects/Tween,-effects/animatedSelector,-dimensions,-offset,-deprecated,-event-alias,-wrap | (c) 2005, 2014 jQuery Foundation, Inc. | jquery.org/license */
@@ -666,25 +676,29 @@ if(g)for(i=f[f.length-1].ownerDocument,n.map(f,mb),j=0;g>j;j++)h=f[j],gb.test(h.
 
 Container.modules["articles-feed"] = function(APP) {
 	var Model,
-	articlesList;
+	articlesList,
+	eventList = [
+		{event: "check-has-articles", action: checkHasArticles},
+		{event: "get-cached-articles", 	action: getCachedArticles}
+	];
 
 	function findArticle(id) {
 		return articlesList.getModel()[id];
 	}
 
-	function checkHasArticles() {
+	function checkHasArticles(args) {
 		return articlesList.getModel().length !== 0;
 	}
 
-	function getCachedFeed() {
+	function getCachedArticles() {
+		console.log("getting cached articles!")
 		return articlesList.getModel();
 	}
 
 	function start(currentFeed) {
-		console.log("starting articles feed...");
 		Model = APP.require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
-		//CORE.listen("check-articles-feed", fn);
+		APP.broadcast.listen(eventList);
 		return;
 	}
 

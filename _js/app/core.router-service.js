@@ -4,18 +4,7 @@
 
 Container.modules["router-service"] = function(APP) {
 
-	function fetchTrendingSearches() {
-		//APP.require(["url-provider, ajax-provider, broadcast"])
-		var url = APP["url-provider"].setAPIURL("search"),
-		ajaxProvider = APP["ajax-provider"];
-				
-		return ajaxProvider({url, async: true}).then(function({data}) {
-			return data.rss.channel[0].item;
-		});
-	}
-
-	APP["router-service"] = { 
-		templateEngine: (function() {
+	APP["router-service"] = (function() {
 		function render(route, container, APP, params) {
 			var timer = setTimeout(()=> { showLoading(); }, 2500);
 
@@ -73,43 +62,8 @@ Container.modules["router-service"] = function(APP) {
 		}
 
 		return {render};
-	}()),
-	routeTable: [
-		{
-			path: "/",
-			templateFilePath: "index.ejs",
-			middleware: APP["router-middleware"]["/"],
-			resolve: fetchTrendingSearches,
-			controller: function(moduleLoader, data) {
-				APP.start(["articles-feed"])(data);
-			}
-		},
-		{
-			path: "/article",
-			templateFilePath: "article-view.ejs",
-			middleware: APP["router-middleware"]["/article"],
-			resolve: null,
-			controller: function(data) {
-				
-			}
-		},
-		{
-			path: "/lunch-order",
-			templateFilePath: "lunch-order-view.ejs",
-			resolve: null,
-			controller: function(data) {
-							
-			}
-		},
-		{
-			path: "/orders-view",
-			templateFilePath: "orders-view.ejs",
-			resolve: null,
-			controller: function(data) {
-
-			}
-		}
-	]};
+	}())
+	
 	return;
 };
 	

@@ -3,22 +3,28 @@
 /*globals Container */
 
 Container.modules.broadcast = function(APP) { 
+	var eventManifest = {};
+
+	function sendNotifications(data) {
+		return function(resultObj, eventName) {
+			resultObj[eventName] = this[eventName](data);
+			return resultObj;
+		}
+	}
 	
-	function notify(evt) { 
-		/*if(core.is_obj(evt) && evt.type) { 
-			core.triggerEvent(evt); 
-		} */
+	function notify(eventList) {
+		return function(data) {
+			return eventList.reduce(sendNotifications(data).bind(eventManifest), {});
+		} 
 	}
 
-	function listen(evts) { 
-		//core.registerEvents(evts, module_selector); 
-	}
 
-	function ignore(evts) { 
-		/*if (core.is_arr(evts)) { 
-			core.removeEvents(evts, module_selector); 
-		} */         
+	function listen(eventArray) { 
+		eventArray.forEach(function(eventObj) {
+			eventManifest[eventObj.event] = eventObj.action;
+		});
+		return;
 	}
-
-	APP.broadcast = {notify, listen, ignore};
+	
+	APP.broadcast = {notify, listen};
 };

@@ -2,7 +2,7 @@
 
 /*globals Container */
 
-Container.modules["module-loader"] = function(APP) { 
+/*Container.modules["module-loader"] = function(APP) { 
 	var stagedModules; 
 	
 	function start(modules) {
@@ -35,4 +35,4 @@ Container.modules["module-loader"] = function(APP) {
 		 
 	APP["module-loader"] = {start, stop, startALL, stopALL};
 	return;
-};
+};*/

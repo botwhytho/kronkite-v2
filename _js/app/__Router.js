@@ -87,11 +87,12 @@ Container.modules.router = function(APP) {
 	}
 
 	function start(args) {
-		var routerSupport = APP.require(["router-service"]);
+		var routerSupport = APP.require(["router-service", 
+			"route-table"]);
 
 		new Router({
-			routeTable: routerSupport.routeTable,
-			templateEngine: routerSupport.templateEngine,
+			routeTable: routerSupport["route-table"],
+			templateEngine: routerSupport["router-service"],
 			templateDirectory: "./views/"
 		});
 	}
