@@ -1,6 +1,6 @@
 /*--- core.router-middleware.js ---*/
 
-Application.CORE["router-middleware"] = (function(CORE) {
+Core.modules["router-middleware"] = function(CORE) {
 
 	var routeMap,
 	$$ = document.querySelector.bind(document);
@@ -34,7 +34,6 @@ Application.CORE["router-middleware"] = (function(CORE) {
 		}
 	}
 
-	return routeMap;
-
-
-}).call(null, Application.CORE)
+	CORE["router-middleware"] = routeMap;
+	return;
+}

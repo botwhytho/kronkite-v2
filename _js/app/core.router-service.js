@@ -2,7 +2,7 @@
 
 /* globals Container, EJS, */
 
-Application.CORE["router-service"] = (function(CORE) {
+Core.modules["router-service"] = function(CORE) {
 
 	function fetchTrendingSearches() {
 		var url = CORE["url-provider"].setAPIURL("search"),
@@ -13,15 +13,15 @@ Application.CORE["router-service"] = (function(CORE) {
 		});
 	}
 
-	return { 
-
+	CORE["router-service"] = { 
 		templateEngine: (function() {
-		function render(route, container, SANDBOX, params) {
+		function render(route, container, CORE, params) {
 			var timer = setTimeout(()=> { showLoading() }, 2500);
 
 			if (container && route.controller) {
 				try { 
-					loadRoute(route, container, timer, SANDBOX, params);	
+					loadRoute(route, container, timer, 
+						CORE, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -41,21 +41,21 @@ Application.CORE["router-service"] = (function(CORE) {
 			return;
 		}
 
-		function loadRoute(route, container, timer, SANDBOX, params) {
+		function loadRoute(route, container, timer, CORE, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, container, SANDBOX, timer);
+				executeRoute(route, container, CORE, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, container, SANDBOX, timer, data)
+				executeRoute(route, container, CORE, timer, data)
 			}).catch((error) => {throw error});
 			return;
 		}
 
-		function executeRoute(route, container, SANDBOX, timer, data) {
+		function executeRoute(route, container, CORE, timer, data) {
 			renderTemplate(route.templateFilePath, container, data, route.middleware);
-			route.controller(SANDBOX.get(["module-loader"]), data);
+			route.controller(CORE.require(["module-loader"]), data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -80,7 +80,7 @@ Application.CORE["router-service"] = (function(CORE) {
 			middleware: CORE["router-middleware"]["/"],
 			resolve: fetchTrendingSearches,
 			controller: function(moduleLoader, data) {
-				moduleLoader.start(["articles-feed"])();
+				moduleLoader.start(["articles-feed"])(data);
 			}
 		},
 		{
@@ -109,6 +109,6 @@ Application.CORE["router-service"] = (function(CORE) {
 			}
 		}
 	]}
-
-}).call(null, Application.CORE)
+	return;
+}
 	

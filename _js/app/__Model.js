@@ -1,6 +1,6 @@
 /*--- Model.js ---*/
 
-Application.modules.model = function (SANDBOX) {
+Core.modules.model = function(CORE) {
 	function Model(data){
                 var modelData = data,
                 model = {},
@@ -54,11 +54,12 @@ Application.modules.model = function (SANDBOX) {
 	}; 
 	
 	function start(args) {
-		SANDBOX["constructor-model"] = Model;
+		CORE["constructor-model"] = Model;
 		return;
 	}
 
-	SANDBOX.get(["module-registry"]).register("model", start);
+  
+	CORE.require(["module-registry"]).register("model", start);
 	return;
 }
 

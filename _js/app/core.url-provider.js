@@ -1,6 +1,6 @@
 /*--- core.url-provider.js ---*/
 
-Application.CORE["url-provider"] = (function() { 
+Core.modules["url-provider"] = function(CORE) { 
 	var currentEnvironment,
 	route,
 	endpointMap = {
@@ -29,7 +29,7 @@ Application.CORE["url-provider"] = (function() {
 	function setAPIURL(endpoint) {
 		return route + endpointMap[endpoint];
 	}
-		 	
- 	return {setEnvironment, setAPIURL}
-
-})();
+		
+	CORE["url-provider"] = {setEnvironment, setAPIURL}
+	return;
+}

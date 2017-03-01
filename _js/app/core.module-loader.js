@@ -1,6 +1,6 @@
 /*--- core.module-loader.js ---*/
 
-Application.CORE["module-loader"] = (function(CORE) { 
+Core.modules["module-loader"] = function(CORE) { 
 	var stagedModules; 
 	
 	function start(modules) {
@@ -30,7 +30,7 @@ Application.CORE["module-loader"] = (function(CORE) {
 	function stopALL() { 
 		
 	}
-		 	
- 	return {start, stop, startALL, stopALL}
-
-}).call(null, Application.CORE);
+		 
+	CORE["module-loader"] = {start, stop, startALL, stopALL}
+	return;
+}

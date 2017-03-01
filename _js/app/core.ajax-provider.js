@@ -1,6 +1,6 @@
 /*--- core.ajax-provider.js ---*/
 
-Application.CORE["ajax-provider"] = (function() { 
+Core.modules["ajax-provider"] = function(CORE) { 
 	
 	function onError(e) {
 		console.error(e);
@@ -32,6 +32,6 @@ Application.CORE["ajax-provider"] = (function() {
 		return promise;
 	}
 
-	return ajaxProvider
-}());
+	return CORE["ajax-provider"] = ajaxProvider;
+};
 

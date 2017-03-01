@@ -1,6 +1,6 @@
 /*--- Sandbox.js ---*/
 
-Application.Sandbox = function(core, module_selector) { 
+/*Application.Sandbox = function(core, module_selector) { 
                    	
 	function notify(evt) { 
 		if(core.is_obj(evt) && evt.type) { 
@@ -31,4 +31,4 @@ Application.Sandbox = function(core, module_selector) {
 
         return {notify, listen, ignore, get}; 
 	     
-};
+};*/

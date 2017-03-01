@@ -1,13 +1,24 @@
 /*--- module.config.js ---*/
 
-Application.modules.config = function (SANDBOX) {
+Core.modules.config = function(CORE) {
+
+	CORE.require = function(modules) {
+		if (modules.length === 1) {
+	    		return CORE[modules[0]];
+	    	}
+		
+		return modules.reduce(function(moduleObject, nextModule) {
+	    		moduleObject[nextModule] = CORE[nextModule];
+	       		return moduleObject;
+	    	},{});
+	}
 	
 	function setEnvironment(config) {
 		if (config.environment === "debug" || config.environment === "remoteDebug" ) {
 	   		console.warn("DEBUG mode ENABLED. API calls routed to localhost.");
 	   	}
 
-		SANDBOX.get(["url-provider"]).setEnvironment(config);
+		CORE.require(["url-provider"]).setEnvironment(config);
 		return;
 	}
 
@@ -27,7 +38,7 @@ Application.modules.config = function (SANDBOX) {
 		setEnvironment(args);
 	
 	}
-
-	SANDBOX.get(["module-registry"]).register("config", start);
+	
+	CORE.require(["module-registry"]).register("config", start);
 	return;
 }

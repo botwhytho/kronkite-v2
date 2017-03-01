@@ -1,13 +1,13 @@
 /*--- module.articles-feed.js ---*/
 
-
-Application.modules.articlesFeed = function (SANDBOX) {
+Sandbox.modules.articlesFeed = function(SANDBOX, CORE) {
 
 	function start(args) {
 		console.log("starting articles-feed...")
-		
+		console.log(CORE.require(["constructor-model"]));
+		console.log(args);
 	}
 
-	SANDBOX.get(["module-registry"]).register("articles-feed", start);
+	CORE.require(["module-registry"]).register("articles-feed", start);
 	return;
 }
