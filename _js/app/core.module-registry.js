@@ -1,6 +1,6 @@
 /*--- core.module-registry.js ---*/
 
-Core.modules["module-registry"] = function(CORE) { 
+/*Core.modules["module-registry"] = function(CORE) { 
     var stagedModules = {}; 
   	
 	function register(moduleName, startFn) {
@@ -18,4 +18,4 @@ Core.modules["module-registry"] = function(CORE) {
 	
 	CORE["module-registry"] = {register, registerEvents, dispatchEvent, stagedModules}
 	return;
-}
+}*/

@@ -1,6 +1,6 @@
 /*--- start-container.js ---*/
 
-function startContainer({requiredModules, init, container,         enclosingContainer}) {
+/*function startContainer({requiredModules, init, container,         enclosingContainer}) {
         
         if (requiredModules.length === 0) {return;}
 
@@ -25,4 +25,4 @@ function startContainer({requiredModules, init, container,         enclosingCont
     		}
     	}
     init(container);
-}
+}*/

@@ -1,21 +1,23 @@
-/*--- core.module-loader.js ---*/
+/*--- APP.module-loader.js ---*/
 
-Core.modules["module-loader"] = function(CORE) { 
+/*globals Container */
+
+Container.modules["module-loader"] = function(APP) { 
 	var stagedModules; 
 	
 	function start(modules) {
 		return function(args) {
-			stagedModules = CORE["module-registry"].stagedModules;
+			stagedModules = APP["module-registry"].stagedModules;
 			modules.forEach((module) => {
 				stagedModules[module](args);
 			}); 
 			return;
-		}
+		};
 	} 
 	
 	function startALL(args) { 
-		stagedModules = CORE["module-registry"].stagedModules;
-		for (module in stagedModules) {
+		stagedModules = APP["module-registry"].stagedModules;
+		for (var module in stagedModules) {
 			stagedModules[module](args);
 		}	
 		
@@ -31,6 +33,6 @@ Core.modules["module-loader"] = function(CORE) {
 		
 	}
 		 
-	CORE["module-loader"] = {start, stop, startALL, stopALL}
+	APP["module-loader"] = {start, stop, startALL, stopALL};
 	return;
-}
+};

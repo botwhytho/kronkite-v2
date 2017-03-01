@@ -1,7 +1,8 @@
 /*--- core.ajax-provider.js ---*/
 
-Core.modules["ajax-provider"] = function(CORE) { 
-	
+/*globals Container */
+
+Container.modules["ajax-provider"] = function(APP) { 
 	function onError(e) {
 		console.error(e);
 		return;
@@ -28,10 +29,11 @@ Core.modules["ajax-provider"] = function(CORE) {
 		  			}); 
 		  		}
 			});
-		});				
+		}).catch(onError);				
 		return promise;
 	}
 
-	return CORE["ajax-provider"] = ajaxProvider;
+	APP["ajax-provider"] = ajaxProvider;
+	return
 };
 

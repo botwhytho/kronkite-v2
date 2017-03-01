@@ -1,6 +1,8 @@
 /*--- Model.js ---*/
 
-Core.modules.model = function(CORE) {
+/*globals Container */
+
+Container.modules.model = function(APP) {
 	function Model(data){
                 var modelData = data,
                 model = {},
@@ -50,16 +52,26 @@ Core.modules.model = function(CORE) {
                         });        
                 }
                 
+                function attempt(tryFn) {
+                    return function(onErrorFn) {
+                        if (!onErrorFn) {
+                            try { return tryFn(); } catch(e) {}
+                        } else {
+                            try { return tryFn(); } catch(e) { 
+                                return onErrorFn(e); 
+                            }
+                        }
+                    };
+                }
+
                 return model;
-	}; 
+	} 
 	
 	function start(args) {
-		CORE["constructor-model"] = Model;
+		APP["constructor-model"] = Model;
 		return;
 	}
 
-  
-	CORE.require(["module-registry"]).register("model", start);
-	return;
-}
+  	return {moduleName: "model", startFn: start};
+};
 

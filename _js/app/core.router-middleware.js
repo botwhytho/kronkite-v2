@@ -1,6 +1,8 @@
 /*--- core.router-middleware.js ---*/
 
-Core.modules["router-middleware"] = function(CORE) {
+/*globals Container */
+
+Container.modules["router-middleware"] = function(APP) {
 
 	var routeMap,
 	$$ = document.querySelector.bind(document);
@@ -32,8 +34,8 @@ Core.modules["router-middleware"] = function(CORE) {
 			return;
 			
 		}
-	}
+	};
 
-	CORE["router-middleware"] = routeMap;
+	APP["router-middleware"] = routeMap;
 	return;
-}
+};

@@ -1,27 +1,28 @@
-/*--- core.router-service.js ---*/
+/*--- APP.router-service.js ---*/
 
-/* globals Container, EJS, */
+/* globals Container, EJS */
 
-Core.modules["router-service"] = function(CORE) {
+Container.modules["router-service"] = function(APP) {
 
 	function fetchTrendingSearches() {
-		var url = CORE["url-provider"].setAPIURL("search"),
-		ajaxProvider = CORE["ajax-provider"];
-
+		//APP.require(["url-provider, ajax-provider, broadcast"])
+		var url = APP["url-provider"].setAPIURL("search"),
+		ajaxProvider = APP["ajax-provider"];
+				
 		return ajaxProvider({url, async: true}).then(function({data}) {
 			return data.rss.channel[0].item;
 		});
 	}
 
-	CORE["router-service"] = { 
+	APP["router-service"] = { 
 		templateEngine: (function() {
-		function render(route, container, CORE, params) {
-			var timer = setTimeout(()=> { showLoading() }, 2500);
+		function render(route, container, APP, params) {
+			var timer = setTimeout(()=> { showLoading(); }, 2500);
 
 			if (container && route.controller) {
 				try { 
 					loadRoute(route, container, timer, 
-						CORE, params);	
+						APP, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -41,21 +42,21 @@ Core.modules["router-service"] = function(CORE) {
 			return;
 		}
 
-		function loadRoute(route, container, timer, CORE, params) {
+		function loadRoute(route, container, timer, APP, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, container, CORE, timer);
+				executeRoute(route, container, APP, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, container, CORE, timer, data)
-			}).catch((error) => {throw error});
+				executeRoute(route, container, APP, timer, data);
+			}).catch((error) => {throw error;});
 			return;
 		}
 
-		function executeRoute(route, container, CORE, timer, data) {
+		function executeRoute(route, container, APP, timer, data) {
 			renderTemplate(route.templateFilePath, container, data, route.middleware);
-			route.controller(CORE.require(["module-loader"]), data);
+			route.controller(APP.stage, data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -71,22 +72,22 @@ Core.modules["router-service"] = function(CORE) {
 			return;
 		}
 
-		return {render}
+		return {render};
 	}()),
 	routeTable: [
 		{
 			path: "/",
 			templateFilePath: "index.ejs",
-			middleware: CORE["router-middleware"]["/"],
+			middleware: APP["router-middleware"]["/"],
 			resolve: fetchTrendingSearches,
 			controller: function(moduleLoader, data) {
-				moduleLoader.start(["articles-feed"])(data);
+				APP.start(["articles-feed"])(data);
 			}
 		},
 		{
 			path: "/article",
 			templateFilePath: "article-view.ejs",
-			middleware: CORE["router-middleware"]["/article"],
+			middleware: APP["router-middleware"]["/article"],
 			resolve: null,
 			controller: function(data) {
 				
@@ -108,7 +109,7 @@ Core.modules["router-service"] = function(CORE) {
 
 			}
 		}
-	]}
+	]};
 	return;
-}
+};
 	

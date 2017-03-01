@@ -1,13 +1,15 @@
 /*--- core.url-provider.js ---*/
 
-Core.modules["url-provider"] = function(CORE) { 
+/* globals Container */
+
+Container.modules["url-provider"] = function(APP) { 
 	var currentEnvironment,
 	route,
 	endpointMap = {
 		search: "trending-search",
 		videos: "trending-videos",
 		music: "trending-music"
-	}
+	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {
 		setRoute({environment, routeMap, remoteDebug}); 
@@ -30,6 +32,6 @@ Core.modules["url-provider"] = function(CORE) {
 		return route + endpointMap[endpoint];
 	}
 		
-	CORE["url-provider"] = {setEnvironment, setAPIURL}
+	APP["url-provider"] = {setEnvironment, setAPIURL};
 	return;
-}
+};

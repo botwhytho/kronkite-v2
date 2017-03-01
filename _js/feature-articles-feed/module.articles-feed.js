@@ -1,13 +1,30 @@
 /*--- module.articles-feed.js ---*/
 
-Sandbox.modules.articlesFeed = function(SANDBOX, CORE) {
+/*globals Container */
 
-	function start(args) {
-		console.log("starting articles-feed...")
-		console.log(CORE.require(["constructor-model"]));
-		console.log(args);
+Container.modules["articles-feed"] = function(APP) {
+	var Model,
+	articlesList;
+
+	function findArticle(id) {
+		return articlesList.getModel()[id];
 	}
 
-	CORE.require(["module-registry"]).register("articles-feed", start);
-	return;
-}
+	function checkHasArticles() {
+		return articlesList.getModel().length !== 0;
+	}
+
+	function getCachedFeed() {
+		return articlesList.getModel();
+	}
+
+	function start(currentFeed) {
+		console.log("starting articles feed...");
+		Model = APP.require(["constructor-model"]);
+		articlesList = new Model(currentFeed);
+		//CORE.listen("check-articles-feed", fn);
+		return;
+	}
+
+	return {moduleName: "articles-feed", startFn: start};
+};

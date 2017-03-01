@@ -1,24 +1,34 @@
 /*--- module.config.js ---*/
 
-Core.modules.config = function(CORE) {
+/*globals Container */
 
-	CORE.require = function(modules) {
+Container.modules.config = function(APP) {
+
+	APP.require = function(modules) {
 		if (modules.length === 1) {
-	    		return CORE[modules[0]];
+	    		return APP[modules[0]];
 	    	}
 		
 		return modules.reduce(function(moduleObject, nextModule) {
-	    		moduleObject[nextModule] = CORE[nextModule];
+	    		moduleObject[nextModule] = APP[nextModule];
 	       		return moduleObject;
 	    	},{});
-	}
+	};
+
+	APP.start = function(modules) {
+		return function(configuration) {
+			modules.forEach(function(module) {
+				APP.stage[module](configuration);
+			});
+		}
+	};
 	
 	function setEnvironment(config) {
 		if (config.environment === "debug" || config.environment === "remoteDebug" ) {
 	   		console.warn("DEBUG mode ENABLED. API calls routed to localhost.");
 	   	}
 
-		CORE.require(["url-provider"]).setEnvironment(config);
+		APP.require(["url-provider"]).setEnvironment(config);
 		return;
 	}
 
@@ -31,14 +41,12 @@ Core.modules.config = function(CORE) {
 			console.error({message, stack});
 		});
 		return;
-	};
+	}
 	
 	function start(args) {
 		startErrorReporter();
 		setEnvironment(args);
-	
 	}
 	
-	CORE.require(["module-registry"]).register("config", start);
-	return;
-}
+	return {moduleName: "config", startFn: start};
+};

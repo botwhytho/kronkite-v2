@@ -1,7 +1,9 @@
 /*--- Router.js
  * Configures and bootstraps the router. ---*/
 
-Core.modules.router = function(CORE) {
+/*globals Container */
+
+Container.modules.router = function(APP) {
 	function Router({routeTable, templateDirectory, templateEngine, middleware}) {
 		var routes = {};
 
@@ -16,7 +18,7 @@ Core.modules.router = function(CORE) {
 		   	if (validateRoute(baseUrl) === false) { 	
 			   	return;
 		   	} else {
-				render(route, domContainer, CORE, params, middleware);
+				render(route, domContainer, APP, params, middleware);
 			} 
 
 			return;	
@@ -81,11 +83,11 @@ Core.modules.router = function(CORE) {
 				route.authRequired
 			);
 		});
-		return 
+		return; 
 	}
 
 	function start(args) {
-		var routerSupport = CORE.require(["router-service"]);
+		var routerSupport = APP.require(["router-service"]);
 
 		new Router({
 			routeTable: routerSupport.routeTable,
@@ -94,8 +96,7 @@ Core.modules.router = function(CORE) {
 		});
 	}
 
-	CORE.require(["module-registry"]).register("router", start);
-	return start;
-}
+	return {moduleName: "router", startFn: start};
+};
 
 

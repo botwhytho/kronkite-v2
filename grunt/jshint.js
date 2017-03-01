@@ -7,9 +7,9 @@ module.exports = {
 			reporter: require('jshint-stylish'),
 			undef: true
 		},
-		js: ['./_js/_base/**.js',
-			'./_js/_core/**.js',
-			'./_js/start.js'
+		js: ["./_js/app/**.js",
+			"./_js/feature-articles-feed/**",
+			"./_js/start.js"
 		]
 			
 }

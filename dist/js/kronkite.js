@@ -11,20 +11,65 @@ cpu:'\n        <svg version="1.1" viewBox="0 0 36 36" preserveAspectRatio="xMidY
 
 /*--- Application.js ---*/
 
-Core.modules = {};
-Sandbox.modules = {};
+/* globals Container */
 
-function Core(initFn, {requiredModules, init, enclosingContainer})  {
-	return initFn({container: Core, requiredModules, init, enclosingContainer});
+Container.modules = {};
+
+function Container(requiredModules, init) {
+        Container.stage = {};
+
+        if (requiredModules.length === 0) {return;}
+                
+        loadModules.call(Container, {
+        	modules: parseRequiredModules(Container)(requiredModules),
+        	fn: stageModules(Container.stage)
+        });
+
+       	init(Container);
 }
 
-function Sandbox(initFn, {requiredModules, init, enclosingContainer}) {
-	return initFn({container: Sandbox, requiredModules, init, enclosingContainer});
+function stageModules(stage) {
+	return function(module) {
+		if (module === undefined) { return;};
+		stage[module.moduleName] = module.startFn;
+	};	
+}
+
+function parseRequiredModules(container) {
+	return function(requiredModules) {
+		if (!requiredModules || requiredModules[0] === "*") {
+	            requiredModules = [];
+	            for (var i in container.modules) {
+	                if (container.modules.hasOwnProperty(i)) {
+	                    requiredModules.push(i); 
+	                }
+	            } 
+	        }
+	        return requiredModules;
+	};
+}
+
+function loadModules({modules, fn}) {
+	var container = this;
+	for (var i = 0; i < modules.length; i++) {
+    		try {
+    			fn(container.modules[modules[i]](container));
+    		} catch(e) {
+    			console.error({
+				error: e, 
+				module: modules[i],
+				ContainerModules: container.modules,
+				container
+			});
+    		}
+    	}
 }
 
 /*--- Model.js ---*/
 
-Core.modules.model = function(CORE) {
+/*globals Container */
+
+Container.modules.model = function(APP) {
 	function Model(data){
                 var modelData = data,
                 model = {},
@@ -74,24 +119,36 @@ Core.modules.model = function(CORE) {
                         });        
                 }
                 
+                function attempt(tryFn) {
+                    return function(onErrorFn) {
+                        if (!onErrorFn) {
+                            try { return tryFn(); } catch(e) {}
+                        } else {
+                            try { return tryFn(); } catch(e) { 
+                                return onErrorFn(e); 
+                            }
+                        }
+                    };
+                }
+
                 return model;
-	}; 
+	} 
 	
 	function start(args) {
-		CORE["constructor-model"] = Model;
+		APP["constructor-model"] = Model;
 		return;
 	}
 
-  
-	CORE.require(["module-registry"]).register("model", start);
-	return;
-}
+  	return {moduleName: "model", startFn: start};
+};
 
 
 /*--- Router.js
  * Configures and bootstraps the router. ---*/
 
-Core.modules.router = function(CORE) {
+/*globals Container */
+
+Container.modules.router = function(APP) {
 	function Router({routeTable, templateDirectory, templateEngine, middleware}) {
 		var routes = {};
 
@@ -106,7 +163,7 @@ Core.modules.router = function(CORE) {
 		   	if (validateRoute(baseUrl) === false) { 	
 			   	return;
 		   	} else {
-				render(route, domContainer, CORE, params, middleware);
+				render(route, domContainer, APP, params, middleware);
 			} 
 
 			return;	
@@ -171,11 +228,11 @@ Core.modules.router = function(CORE) {
 				route.authRequired
 			);
 		});
-		return 
+		return; 
 	}
 
 	function start(args) {
-		var routerSupport = CORE.require(["router-service"]);
+		var routerSupport = APP.require(["router-service"]);
 
 		new Router({
 			routeTable: routerSupport.routeTable,
@@ -184,51 +241,16 @@ Core.modules.router = function(CORE) {
 		});
 	}
 
-	CORE.require(["module-registry"]).register("router", start);
-	return start;
-}
+	return {moduleName: "router", startFn: start};
+};
 
 
-
-/*--- Sandbox.js ---*/
-
-/*Application.Sandbox = function(core, module_selector) { 
-                   	
-	function notify(evt) { 
-		if(core.is_obj(evt) && evt.type) { 
-			core.triggerEvent(evt); 
-		} 
-	}
-
-	function listen(evts) { 
-		core.registerEvents(evts, module_selector); 
-	}
-
-	function ignore(evts) { 
-		if (core.is_arr(evts)) { 
-			core.removeEvents(evts, module_selector); 
-		}          
-	}
-
-	function get(modules) {
-		if (modules.length === 1) {
-    			return core[modules[0]];
-    		}
-
-		return modules.reduce(function(moduleObject, nextModule) {
-    			moduleObject[nextModule] = core[nextModule];
-       			return moduleObject;
-    		},{});
-	}
-
-        return {notify, listen, ignore, get}; 
-	     
-};*/
 
 /*--- core.ajax-provider.js ---*/
 
-Core.modules["ajax-provider"] = function(CORE) { 
-	
+/*globals Container */
+
+Container.modules["ajax-provider"] = function(APP) { 
 	function onError(e) {
 		console.error(e);
 		return;
@@ -255,35 +277,71 @@ Core.modules["ajax-provider"] = function(CORE) {
 		  			}); 
 		  		}
 			});
-		});				
+		}).catch(onError);				
 		return promise;
 	}
 
-	return CORE["ajax-provider"] = ajaxProvider;
+	APP["ajax-provider"] = ajaxProvider;
+	return
 };
 
 
+/*--- core.broadcast.js ---*/
+
+/*globals Container */
+
+Container.modules.broadcast = function(APP) { 
+	
+	function notify(evt) { 
+		/*if(core.is_obj(evt) && evt.type) { 
+			core.triggerEvent(evt); 
+		} */
+	}
+
+	function listen(evts) { 
+		//core.registerEvents(evts, module_selector); 
+	}
+
+	function ignore(evts) { 
+		/*if (core.is_arr(evts)) { 
+			core.removeEvents(evts, module_selector); 
+		} */         
+	}
+
+	APP.broadcast = {notify, listen, ignore};
+};
+
 /*--- module.config.js ---*/
 
-Core.modules.config = function(CORE) {
+/*globals Container */
 
-	CORE.require = function(modules) {
+Container.modules.config = function(APP) {
+
+	APP.require = function(modules) {
 		if (modules.length === 1) {
-	    		return CORE[modules[0]];
+	    		return APP[modules[0]];
 	    	}
 		
 		return modules.reduce(function(moduleObject, nextModule) {
-	    		moduleObject[nextModule] = CORE[nextModule];
+	    		moduleObject[nextModule] = APP[nextModule];
 	       		return moduleObject;
 	    	},{});
-	}
+	};
+
+	APP.start = function(modules) {
+		return function(configuration) {
+			modules.forEach(function(module) {
+				APP.stage[module](configuration);
+			});
+		}
+	};
 	
 	function setEnvironment(config) {
 		if (config.environment === "debug" || config.environment === "remoteDebug" ) {
 	   		console.warn("DEBUG mode ENABLED. API calls routed to localhost.");
 	   	}
 
-		CORE.require(["url-provider"]).setEnvironment(config);
+		APP.require(["url-provider"]).setEnvironment(config);
 		return;
 	}
 
@@ -296,36 +354,36 @@ Core.modules.config = function(CORE) {
 			console.error({message, stack});
 		});
 		return;
-	};
+	}
 	
 	function start(args) {
 		startErrorReporter();
 		setEnvironment(args);
-	
 	}
 	
-	CORE.require(["module-registry"]).register("config", start);
-	return;
-}
+	return {moduleName: "config", startFn: start};
+};
 
-/*--- core.module-loader.js ---*/
+/*--- APP.module-loader.js ---*/
 
-Core.modules["module-loader"] = function(CORE) { 
+/*globals Container */
+
+Container.modules["module-loader"] = function(APP) { 
 	var stagedModules; 
 	
 	function start(modules) {
 		return function(args) {
-			stagedModules = CORE["module-registry"].stagedModules;
+			stagedModules = APP["module-registry"].stagedModules;
 			modules.forEach((module) => {
 				stagedModules[module](args);
 			}); 
 			return;
-		}
+		};
 	} 
 	
 	function startALL(args) { 
-		stagedModules = CORE["module-registry"].stagedModules;
-		for (module in stagedModules) {
+		stagedModules = APP["module-registry"].stagedModules;
+		for (var module in stagedModules) {
 			stagedModules[module](args);
 		}	
 		
@@ -341,13 +399,13 @@ Core.modules["module-loader"] = function(CORE) {
 		
 	}
 		 
-	CORE["module-loader"] = {start, stop, startALL, stopALL}
+	APP["module-loader"] = {start, stop, startALL, stopALL};
 	return;
-}
+};
 
 /*--- core.module-registry.js ---*/
 
-Core.modules["module-registry"] = function(CORE) { 
+/*Core.modules["module-registry"] = function(CORE) { 
     var stagedModules = {}; 
   	
 	function register(moduleName, startFn) {
@@ -365,11 +423,13 @@ Core.modules["module-registry"] = function(CORE) {
 	
 	CORE["module-registry"] = {register, registerEvents, dispatchEvent, stagedModules}
 	return;
-}
+}*/
 
 /*--- core.router-middleware.js ---*/
 
-Core.modules["router-middleware"] = function(CORE) {
+/*globals Container */
+
+Container.modules["router-middleware"] = function(APP) {
 
 	var routeMap,
 	$$ = document.querySelector.bind(document);
@@ -401,36 +461,37 @@ Core.modules["router-middleware"] = function(CORE) {
 			return;
 			
 		}
-	}
+	};
 
-	CORE["router-middleware"] = routeMap;
+	APP["router-middleware"] = routeMap;
 	return;
-}
+};
 
-/*--- core.router-service.js ---*/
+/*--- APP.router-service.js ---*/
 
-/* globals Container, EJS, */
+/* globals Container, EJS */
 
-Core.modules["router-service"] = function(CORE) {
+Container.modules["router-service"] = function(APP) {
 
 	function fetchTrendingSearches() {
-		var url = CORE["url-provider"].setAPIURL("search"),
-		ajaxProvider = CORE["ajax-provider"];
-
+		//APP.require(["url-provider, ajax-provider, broadcast"])
+		var url = APP["url-provider"].setAPIURL("search"),
+		ajaxProvider = APP["ajax-provider"];
+				
 		return ajaxProvider({url, async: true}).then(function({data}) {
 			return data.rss.channel[0].item;
 		});
 	}
 
-	CORE["router-service"] = { 
+	APP["router-service"] = { 
 		templateEngine: (function() {
-		function render(route, container, CORE, params) {
-			var timer = setTimeout(()=> { showLoading() }, 2500);
+		function render(route, container, APP, params) {
+			var timer = setTimeout(()=> { showLoading(); }, 2500);
 
 			if (container && route.controller) {
 				try { 
 					loadRoute(route, container, timer, 
-						CORE, params);	
+						APP, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -450,21 +511,21 @@ Core.modules["router-service"] = function(CORE) {
 			return;
 		}
 
-		function loadRoute(route, container, timer, CORE, params) {
+		function loadRoute(route, container, timer, APP, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, container, CORE, timer);
+				executeRoute(route, container, APP, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, container, CORE, timer, data)
-			}).catch((error) => {throw error});
+				executeRoute(route, container, APP, timer, data);
+			}).catch((error) => {throw error;});
 			return;
 		}
 
-		function executeRoute(route, container, CORE, timer, data) {
+		function executeRoute(route, container, APP, timer, data) {
 			renderTemplate(route.templateFilePath, container, data, route.middleware);
-			route.controller(CORE.require(["module-loader"]), data);
+			route.controller(APP.stage, data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -480,22 +541,22 @@ Core.modules["router-service"] = function(CORE) {
 			return;
 		}
 
-		return {render}
+		return {render};
 	}()),
 	routeTable: [
 		{
 			path: "/",
 			templateFilePath: "index.ejs",
-			middleware: CORE["router-middleware"]["/"],
+			middleware: APP["router-middleware"]["/"],
 			resolve: fetchTrendingSearches,
 			controller: function(moduleLoader, data) {
-				moduleLoader.start(["articles-feed"])(data);
+				APP.start(["articles-feed"])(data);
 			}
 		},
 		{
 			path: "/article",
 			templateFilePath: "article-view.ejs",
-			middleware: CORE["router-middleware"]["/article"],
+			middleware: APP["router-middleware"]["/article"],
 			resolve: null,
 			controller: function(data) {
 				
@@ -517,21 +578,23 @@ Core.modules["router-service"] = function(CORE) {
 
 			}
 		}
-	]}
+	]};
 	return;
-}
+};
 	
 
 /*--- core.url-provider.js ---*/
 
-Core.modules["url-provider"] = function(CORE) { 
+/* globals Container */
+
+Container.modules["url-provider"] = function(APP) { 
 	var currentEnvironment,
 	route,
 	endpointMap = {
 		search: "trending-search",
 		videos: "trending-videos",
 		music: "trending-music"
-	}
+	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {
 		setRoute({environment, routeMap, remoteDebug}); 
@@ -554,13 +617,13 @@ Core.modules["url-provider"] = function(CORE) {
 		return route + endpointMap[endpoint];
 	}
 		
-	CORE["url-provider"] = {setEnvironment, setAPIURL}
+	APP["url-provider"] = {setEnvironment, setAPIURL};
 	return;
-}
+};
 
 /*--- start-container.js ---*/
 
-function startContainer({requiredModules, init, container,         enclosingContainer}) {
+/*function startContainer({requiredModules, init, container,         enclosingContainer}) {
         
         if (requiredModules.length === 0) {return;}
 
@@ -585,7 +648,7 @@ function startContainer({requiredModules, init, container,         enclosingCont
     		}
     	}
     init(container);
-}
+}*/
 
 
 
@@ -599,42 +662,40 @@ if(g)for(i=f[f.length-1].ownerDocument,n.map(f,mb),j=0;g>j;j++)h=f[j],gb.test(h.
 
 /*--- module.articles-feed.js ---*/
 
-Sandbox.modules.articlesFeed = function(SANDBOX, CORE) {
+/*globals Container */
 
-	function start(args) {
-		console.log("starting articles-feed...")
-		console.log(CORE.require(["constructor-model"]));
-		console.log(args);
+Container.modules["articles-feed"] = function(APP) {
+	var Model,
+	articlesList;
+
+	function findArticle(id) {
+		return articlesList.getModel()[id];
 	}
 
-	CORE.require(["module-registry"]).register("articles-feed", start);
-	return;
-}
+	function checkHasArticles() {
+		return articlesList.getModel().length !== 0;
+	}
+
+	function getCachedFeed() {
+		return articlesList.getModel();
+	}
+
+	function start(currentFeed) {
+		console.log("starting articles feed...");
+		Model = APP.require(["constructor-model"]);
+		articlesList = new Model(currentFeed);
+		//CORE.listen("check-articles-feed", fn);
+		return;
+	}
+
+	return {moduleName: "articles-feed", startFn: start};
+};
 /*--- start.js ---*/
 
-new Core(startContainer, {
-	requiredModules: ["module-registry", 
-		"module-loader",
-		"config",
-		"model",
-		"router-middleware",
-		"router-service", 
-		"router",
-		"ajax-provider",
-		"url-provider"
-	],
-    	init: function(CORE) {
-    		new Sandbox(startContainer, {
-			requiredModules: ["*"],
-			enclosingContainer: CORE,
-			init: initSandbox(CORE)
-       		})
-    	}
-});
+/* globals Container */
 
-function initSandbox(CORE) {
-return function(SANDBOX) {
-	CORE.require(["module-loader"]).start(["router", "config", "model"])({
+new Container(["*"], function start(APP) {
+	APP.start(["router", "config", "model"])({
 		environment: "debug",
 		remoteDebug: false,
 		routeMap: {
@@ -642,5 +703,6 @@ return function(SANDBOX) {
 			remoteDebug: "http://192.168.254.4:8080/",
 			production: "http://kronkite-server.herokuapp.com"
 		} 
-	})
-}}
+	});
+});
+
