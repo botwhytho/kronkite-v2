@@ -9,8 +9,10 @@ Container.modules["router-middleware"] = function(APP) {
 	
 	function showHideHeaderBarChrome(action) {
 		var headerChrome = [$$(".header-container-custom"),
-		$$(".content-container.content-container-custom")];
+		$$(".content-container.content-container-custom")
+		];
 
+	
 		if (action === "hide") {
 			headerChrome.forEach((element) => {
 				element.dataset.currentView = "article";

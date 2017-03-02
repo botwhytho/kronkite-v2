@@ -438,11 +438,14 @@ Container.modules["resolve-map"] = function(APP) {
 
 	function getCachedArticles(hasArticles) {
 		if (hasArticles) {
+			//retrieves cached articles from object returned from the notification.
 			var data = APP.broadcast.notify(["get-cached-articles"])()["get-cached-articles"]
 
 			return Promise.resolve(data);
 		} 
 	}
+
+	/*--- END Utility Functions ---*/
 
 	function fetchTrendingSearches() {
 		var url = APP["url-provider"].setAPIURL("search"),
@@ -453,6 +456,7 @@ Container.modules["resolve-map"] = function(APP) {
 		}
 
 		try {
+			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
 			return getCachedArticles(APP.broadcast.notify(["check-has-articles"])());
 		} catch(e) {
 			//console.error(e);
@@ -460,7 +464,13 @@ Container.modules["resolve-map"] = function(APP) {
 		} 
 	}
 
-	APP["resolve-map"] = {fetchTrendingSearches}
+	function fetchArticle({id}) {
+		var article = APP.broadcast.notify(["find-article"])(id)["find-article"];
+		//console.log(article);
+		return Promise.resolve(article);
+	}
+
+	APP["resolve-map"] = {fetchTrendingSearches, fetchArticle}
 	return;
 }
 
@@ -486,7 +496,7 @@ Container.modules["route-table"] = function(APP) {
 			middleware: function(){
 				APP["router-middleware"]["/article"]();	
 			},
-			resolve: null,
+			resolve: APP.require(["resolve-map"]).fetchArticle,
 			controller: function(data) {
 				
 			}
@@ -521,8 +531,10 @@ Container.modules["router-middleware"] = function(APP) {
 	
 	function showHideHeaderBarChrome(action) {
 		var headerChrome = [$$(".header-container-custom"),
-		$$(".content-container.content-container-custom")];
+		$$(".content-container.content-container-custom")
+		];
 
+	
 		if (action === "hide") {
 			headerChrome.forEach((element) => {
 				element.dataset.currentView = "article";
@@ -632,7 +644,8 @@ Container.modules["url-provider"] = function(APP) {
 	endpointMap = {
 		search: "trending-search",
 		videos: "trending-videos",
-		music: "trending-music"
+		music: "trending-music",
+		articles: "article"
 	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {
@@ -679,7 +692,8 @@ Container.modules["articles-feed"] = function(APP) {
 	articlesList,
 	eventList = [
 		{event: "check-has-articles", action: checkHasArticles},
-		{event: "get-cached-articles", 	action: getCachedArticles}
+		{event: "get-cached-articles", 	action: getCachedArticles},
+		{event: "find-article", action: findArticle}
 	];
 
 	function findArticle(id) {
@@ -691,7 +705,6 @@ Container.modules["articles-feed"] = function(APP) {
 	}
 
 	function getCachedArticles() {
-		console.log("getting cached articles!")
 		return articlesList.getModel();
 	}
 

@@ -20,7 +20,7 @@ Container.modules["route-table"] = function(APP) {
 			middleware: function(){
 				APP["router-middleware"]["/article"]();	
 			},
-			resolve: null,
+			resolve: APP.require(["resolve-map"]).fetchArticle,
 			controller: function(data) {
 				
 			}

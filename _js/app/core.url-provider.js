@@ -8,7 +8,8 @@ Container.modules["url-provider"] = function(APP) {
 	endpointMap = {
 		search: "trending-search",
 		videos: "trending-videos",
-		music: "trending-music"
+		music: "trending-music",
+		articles: "article"
 	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {

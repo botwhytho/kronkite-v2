@@ -7,7 +7,8 @@ Container.modules["articles-feed"] = function(APP) {
 	articlesList,
 	eventList = [
 		{event: "check-has-articles", action: checkHasArticles},
-		{event: "get-cached-articles", 	action: getCachedArticles}
+		{event: "get-cached-articles", 	action: getCachedArticles},
+		{event: "find-article", action: findArticle}
 	];
 
 	function findArticle(id) {
@@ -19,7 +20,6 @@ Container.modules["articles-feed"] = function(APP) {
 	}
 
 	function getCachedArticles() {
-		console.log("getting cached articles!")
 		return articlesList.getModel();
 	}
 

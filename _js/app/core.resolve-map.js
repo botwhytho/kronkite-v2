@@ -4,11 +4,14 @@ Container.modules["resolve-map"] = function(APP) {
 
 	function getCachedArticles(hasArticles) {
 		if (hasArticles) {
+			//retrieves cached articles from object returned from the notification.
 			var data = APP.broadcast.notify(["get-cached-articles"])()["get-cached-articles"]
 
 			return Promise.resolve(data);
 		} 
 	}
+
+	/*--- END Utility Functions ---*/
 
 	function fetchTrendingSearches() {
 		var url = APP["url-provider"].setAPIURL("search"),
@@ -19,6 +22,7 @@ Container.modules["resolve-map"] = function(APP) {
 		}
 
 		try {
+			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
 			return getCachedArticles(APP.broadcast.notify(["check-has-articles"])());
 		} catch(e) {
 			//console.error(e);
@@ -26,6 +30,12 @@ Container.modules["resolve-map"] = function(APP) {
 		} 
 	}
 
-	APP["resolve-map"] = {fetchTrendingSearches}
+	function fetchArticle({id}) {
+		var article = APP.broadcast.notify(["find-article"])(id)["find-article"];
+		//console.log(article);
+		return Promise.resolve(article);
+	}
+
+	APP["resolve-map"] = {fetchTrendingSearches, fetchArticle}
 	return;
 }
