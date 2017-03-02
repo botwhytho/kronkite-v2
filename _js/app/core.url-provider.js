@@ -9,7 +9,7 @@ Container.modules["url-provider"] = function(APP) {
 		search: "trending-search",
 		videos: "trending-videos",
 		music: "trending-music",
-		articles: "article"
+		article: "article"
 	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {

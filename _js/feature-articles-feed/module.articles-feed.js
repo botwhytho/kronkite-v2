@@ -8,7 +8,7 @@ Container.modules["articles-feed"] = function(APP) {
 	eventList = [
 		{event: "check-has-articles", action: checkHasArticles},
 		{event: "get-cached-articles", 	action: getCachedArticles},
-		{event: "find-article", action: findArticle}
+		{event: "get-article-metadata", action: findArticle}
 	];
 
 	function findArticle(id) {

@@ -1,12 +1,18 @@
 /*--- core.resolve-map.js ---*/
 
 Container.modules["resolve-map"] = function(APP) {
+	var ajaxProvider = APP["ajax-provider"];
+
+	function pushEvent(event) {
+		return function(data) {
+			return APP.broadcast.notify([event])(data)[event];
+		}
+	}
 
 	function getCachedArticles(hasArticles) {
 		if (hasArticles) {
 			//retrieves cached articles from object returned from the notification.
-			var data = APP.broadcast.notify(["get-cached-articles"])()["get-cached-articles"]
-
+			var data = pushEvent(["get-cached-articles"])();
 			return Promise.resolve(data);
 		} 
 	}
@@ -14,8 +20,7 @@ Container.modules["resolve-map"] = function(APP) {
 	/*--- END Utility Functions ---*/
 
 	function fetchTrendingSearches() {
-		var url = APP["url-provider"].setAPIURL("search"),
-		ajaxProvider = APP["ajax-provider"];
+		var url = APP["url-provider"].setAPIURL("search");
 
 		function onFeedResponse({data}) {
 			return data.rss.channel[0].item;
@@ -31,9 +36,17 @@ Container.modules["resolve-map"] = function(APP) {
 	}
 
 	function fetchArticle({id}) {
-		var article = APP.broadcast.notify(["find-article"])(id)["find-article"];
-		//console.log(article);
-		return Promise.resolve(article);
+		var metadata = pushEvent(["get-article-metadata"])(id),
+		url = APP["url-provider"].setAPIURL("article"),
+		params = {url: metadata["ht:news_item"][0]["ht:news_item_url"][0]}
+		
+		ajaxProvider({url, data: params}).then(function(data) {
+			console.log("article copy:", data);
+		});
+
+		console.log({metadata});
+		//{url: }
+		return Promise.resolve(metadata);
 	}
 
 	APP["resolve-map"] = {fetchTrendingSearches, fetchArticle}
