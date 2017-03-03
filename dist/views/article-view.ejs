@@ -21,7 +21,9 @@
         	<div><span style="font-weight: bold;"><%=data["ht:news_item"][0]["ht:news_item_source"][0]%> </span>| <%=truncate(data["pubDate"][0], 53)%>
             </div>
         	<div style="border-bottom: 5px dotted black; margin: 10px 55px 10px 0px;"></div>
-			<article><%=data.content%></article>
+			<article>
+                <h3 class="article-headline-custom"><%= data.excerpt %></h3>
+                <%=data.content%></article>
         </div>
     </div>
 </div>

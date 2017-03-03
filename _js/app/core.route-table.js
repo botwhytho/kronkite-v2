@@ -2,7 +2,7 @@
 
 Container.modules["route-table"] = function(APP) {
 
-	APP["route-table"] = [
+	APP.set("route-table")([
 		{
 			path: "/",
 			templateFilePath: "index.ejs",
@@ -10,8 +10,9 @@ Container.modules["route-table"] = function(APP) {
 				APP["router-middleware"]["/"]();
 			},
 			resolve: APP.require(["resolve-map"]).fetchTrendingSearches,
-			controller: function(moduleLoader, data) {
+			controller: function(modules, data) {
 				APP.start(["articles-feed"])(data);
+				console.log("modules", modules);
 			}
 		},
 		{
@@ -21,7 +22,7 @@ Container.modules["route-table"] = function(APP) {
 				APP["router-middleware"]["/article"]();	
 			},
 			resolve: APP.require(["resolve-map"]).fetchArticle,
-			controller: function(data) {
+			controller: function(modules, data) {
 				
 			}
 		},
@@ -41,6 +42,6 @@ Container.modules["route-table"] = function(APP) {
 
 			}
 		}
-	]
+	]);
 	return;
 }

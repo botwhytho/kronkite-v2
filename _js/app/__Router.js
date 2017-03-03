@@ -1,9 +1,10 @@
-/*--- Router.js
- * Configures and bootstraps the router. ---*/
+/*--- __router.js  
+  * Configures and bootstraps the router. ---*/
 
 /*globals Container */
 
-Container.modules.router = function(APP) {
+Container.modules.router = function({require, set}) {
+	
 	function Router({routeTable, templateDirectory, templateEngine, middleware}) {
 		var routes = {};
 
@@ -18,7 +19,7 @@ Container.modules.router = function(APP) {
 		   	if (validateRoute(baseUrl) === false) { 	
 			   	return;
 		   	} else {
-				render(route, domContainer, APP, params, middleware);
+				render(route, domContainer, require, params, middleware);
 			} 
 
 			return;	
@@ -87,7 +88,7 @@ Container.modules.router = function(APP) {
 	}
 
 	function start(args) {
-		var routerSupport = APP.require(["router-service", 
+		var routerSupport = require(["router-service", 
 			"route-table"]);
 
 		new Router({

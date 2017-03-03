@@ -2,7 +2,7 @@
 
 /*globals Container */
 
-Container.modules["utils"] = function(APP) { 
+Container.modules["utils"] = function({require, set}) { 
 	
 	function objectExtend(target) {
 		var extObj,
@@ -43,8 +43,6 @@ Container.modules["utils"] = function(APP) {
       		};
 	}
 
-
-
-	APP["utils"] = {objectExtend};
+	set("utils")({objectExtend});
 	return
 };

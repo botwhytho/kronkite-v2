@@ -1,4 +1,4 @@
-/*--- module.config.js ---*/
+/*--- __config.js ---*/
 
 /*globals Container */
 
@@ -13,6 +13,13 @@ Container.modules.config = function(APP) {
 	    		moduleObject[nextModule] = APP[nextModule];
 	       		return moduleObject;
 	    	},{});
+	};
+
+	APP.set = function(name) {
+		return function(object) {
+			APP[name] = object;
+			return;
+		};
 	};
 
 	APP.start = function(modules) {
@@ -47,6 +54,6 @@ Container.modules.config = function(APP) {
 		startErrorReporter();
 		setEnvironment(args);
 	}
-	
+
 	return {moduleName: "config", startFn: start};
 };

@@ -2,7 +2,7 @@
 
 /* globals Container */
 
-Container.modules["url-provider"] = function(APP) { 
+Container.modules["url-provider"] = function({require, set}) { 
 	var currentEnvironment,
 	route,
 	endpointMap = {
@@ -33,6 +33,6 @@ Container.modules["url-provider"] = function(APP) {
 		return route + endpointMap[endpoint];
 	}
 		
-	APP["url-provider"] = {setEnvironment, setAPIURL};
+	set("url-provider")({setEnvironment, setAPIURL});
 	return;
 };

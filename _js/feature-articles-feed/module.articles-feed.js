@@ -2,13 +2,14 @@
 
 /*globals Container */
 
-Container.modules["articles-feed"] = function(APP) {
+Container.modules["articles-feed"] = function({require, set}) {
 	var Model,
 	articlesList,
+	broadcast = require(["broadcast"]),
 	eventList = [
-		{event: "check-has-articles", action: checkHasArticles},
-		{event: "get-cached-articles", 	action: getCachedArticles},
-		{event: "get-article-metadata", action: findArticle}
+		{event: "checkHasArticles", action: checkHasArticles},
+		{event: "getCachedArticles", action: getCachedArticles},
+		{event: "getArticleMetadata", action: findArticle}
 	];
 
 	function findArticle(id) {
@@ -24,9 +25,9 @@ Container.modules["articles-feed"] = function(APP) {
 	}
 
 	function start(currentFeed) {
-		Model = APP.require(["constructor-model"]);
+		Model = require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
-		APP.broadcast.listen(eventList);
+		broadcast.listen(eventList);
 		return;
 	}
 

@@ -1,8 +1,8 @@
-/*--- Model.js ---*/
+/*--- __model.js ---*/
 
 /*globals Container */
 
-Container.modules.model = function(APP) {
+Container.modules.model = function({require, set}) {
 	function Model(data){
                 var modelData = data,
                 model = {},
@@ -68,7 +68,7 @@ Container.modules.model = function(APP) {
 	} 
 	
 	function start(args) {
-		APP["constructor-model"] = Model;
+		set("constructor-model")(Model);
 		return;
 	}
 

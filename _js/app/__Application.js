@@ -1,4 +1,4 @@
-/*--- Application.js ---*/
+/*--- __application.js ---*/
 
 /* globals Container */
 

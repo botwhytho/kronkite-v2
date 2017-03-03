@@ -1,17 +1,17 @@
-/*--- APP.router-service.js ---*/
+/*--- core.router-service.js ---*/
 
 /* globals Container, EJS */
 
-Container.modules["router-service"] = function(APP) {
+Container.modules["router-service"] = function({require, set}) {
 
-	APP["router-service"] = (function() {
-		function render(route, container, APP, params) {
+	set("router-service")((function() {
+		function render(route, container, require, params) {
 			var timer = setTimeout(()=> { showLoading(); }, 2500);
 
 			if (container && route.controller) {
 				try { 
 					loadRoute(route, container, timer, 
-						APP, params);	
+						require, params);	
 				} catch (error) {
 			    		console.error("ROUTER ERROR: ", error);
 			    	}
@@ -31,21 +31,21 @@ Container.modules["router-service"] = function(APP) {
 			return;
 		}
 
-		function loadRoute(route, container, timer, APP, params) {
+		function loadRoute(route, container, timer, require, params) {
 			if ( typeof(route.resolve) !== "function" )  {
-				executeRoute(route, container, APP, timer);
+				executeRoute(route, container, require, timer);
 				return;
 			}
 
 			route.resolve(params).then(function(data) {
-				executeRoute(route, container, APP, timer, data);
+				executeRoute(route, container, require, timer, data);
 			}).catch((error) => {throw error;});
 			return;
 		}
 
-		function executeRoute(route, container, APP, timer, data) {
+		function executeRoute(route, container, require, timer, data) {
 			renderTemplate(route.templateFilePath, container, data, route.middleware);
-			route.controller(APP.stage, data);
+			route.controller(require(["stage"]), data);
 			clearTimeout(timer);
 			hideLoading();
 			return;
@@ -62,7 +62,7 @@ Container.modules["router-service"] = function(APP) {
 		}
 
 		return {render};
-	}())
+	}()))
 	
 	return;
 };

@@ -1,19 +1,19 @@
 /*--- core.resolve-map.js ---*/
 
-Container.modules["resolve-map"] = function(APP) {
-	var ajaxProvider = APP["ajax-provider"],
-	utils = APP["utils"];
+Container.modules["resolve-map"] = function({require, set}) {
+	var ajaxProvider = require(["ajax-provider"]),
+	broadcast = require(["broadcast"]);
 
 	function pushEvent(event) {
 		return function(data) {
-			return APP.broadcast.notify([event])(data)[event];
+			return broadcast.notify([event])(data)[event];
 		}
 	}
 
 	function getCachedArticles(hasArticles) {
 		if (hasArticles) {
 			//retrieves cached articles from object returned from the notification.
-			var data = pushEvent(["get-cached-articles"])();
+			var data = pushEvent(["getCachedArticles"])();
 			return Promise.resolve(data);
 		} 
 	}
@@ -21,7 +21,7 @@ Container.modules["resolve-map"] = function(APP) {
 	/*--- END Utility Functions ---*/
 
 	function fetchTrendingSearches() {
-		var url = APP["url-provider"].setAPIURL("search");
+		var url = require(["url-provider"]).setAPIURL("search");
 
 		function onFeedResponse({data}) {
 			return data.rss.channel[0].item;
@@ -29,7 +29,7 @@ Container.modules["resolve-map"] = function(APP) {
 
 		try {
 			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
-			return getCachedArticles(pushEvent(["check-has-articles"])());
+			return getCachedArticles(pushEvent(["checkHasArticles"])());
 		} catch(e) {
 			//console.error(e);
 			return ajaxProvider({url}).then(onFeedResponse);
@@ -37,12 +37,12 @@ Container.modules["resolve-map"] = function(APP) {
 	}
 
 	function fetchArticle({id}) {
-		var metadata = pushEvent(["get-article-metadata"])(id),
-		//url = APP["url-provider"].setAPIURL("article"),
+		var metadata = pushEvent(["getArticleMetadata"])(id),
+		//url = require(["url-provider"]).setAPIURL("article"),
 		url = "./sample-data.json",
-		objectExtend = APP["utils"].objectExtend,
+		objectExtend = require(["utils"]).objectExtend,
 		params = {url: metadata["ht:news_item"][0]["ht:news_item_url"][0]};
-
+		
 		return ajaxProvider({url}).then(({data}) => {
 			console.log({data});
 			return data;
@@ -55,6 +55,6 @@ Container.modules["resolve-map"] = function(APP) {
 		});*/
 	}
 
-	APP["resolve-map"] = {fetchTrendingSearches, fetchArticle}
+	set("resolve-map")({fetchTrendingSearches, fetchArticle})
 	return;
 }

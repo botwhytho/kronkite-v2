@@ -2,7 +2,7 @@
 
 /*globals Container */
 
-Container.modules["ajax-provider"] = function(APP) { 
+Container.modules["ajax-provider"] = function({require, set}) { 
 	function onError(e) {
 		console.error(e);
 		return;
@@ -33,7 +33,7 @@ Container.modules["ajax-provider"] = function(APP) {
 		return promise;
 	}
 
-	APP["ajax-provider"] = ajaxProvider;
+	set("ajax-provider")(ajaxProvider);
 	return
 };
 

@@ -2,7 +2,7 @@
 
 /*globals Container */
 
-Container.modules["router-middleware"] = function(APP) {
+Container.modules["router-middleware"] = function({require, set}) {
 
 	var routeMap,
 	$$ = document.querySelector.bind(document);
@@ -38,6 +38,6 @@ Container.modules["router-middleware"] = function(APP) {
 		}
 	};
 
-	APP["router-middleware"] = routeMap;
+	set("router-middleware")(routeMap);
 	return;
 };

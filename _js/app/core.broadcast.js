@@ -2,7 +2,7 @@
 
 /*globals Container */
 
-Container.modules.broadcast = function(APP) { 
+Container.modules.broadcast = function({require, set}) { 
 	var eventManifest = {};
 
 	function sendNotifications(data) {
@@ -26,5 +26,5 @@ Container.modules.broadcast = function(APP) {
 		return;
 	}
 	
-	APP.broadcast = {notify, listen};
+	set("broadcast")({notify, listen});
 };
