@@ -435,7 +435,8 @@ Container.modules.config = function(APP) {
 /*--- core.resolve-map.js ---*/
 
 Container.modules["resolve-map"] = function(APP) {
-	var ajaxProvider = APP["ajax-provider"];
+	var ajaxProvider = APP["ajax-provider"],
+	utils = APP["utils"];
 
 	function pushEvent(event) {
 		return function(data) {
@@ -462,7 +463,7 @@ Container.modules["resolve-map"] = function(APP) {
 
 		try {
 			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
-			return getCachedArticles(APP.broadcast.notify(["check-has-articles"])());
+			return getCachedArticles(pushEvent(["check-has-articles"])());
 		} catch(e) {
 			//console.error(e);
 			return ajaxProvider({url}).then(onFeedResponse);
@@ -471,16 +472,21 @@ Container.modules["resolve-map"] = function(APP) {
 
 	function fetchArticle({id}) {
 		var metadata = pushEvent(["get-article-metadata"])(id),
-		url = APP["url-provider"].setAPIURL("article"),
-		params = {url: metadata["ht:news_item"][0]["ht:news_item_url"][0]}
-		
-		ajaxProvider({url, data: params}).then(function(data) {
-			console.log("article copy:", data);
+		//url = APP["url-provider"].setAPIURL("article"),
+		url = "./sample-data.json",
+		objectExtend = APP["utils"].objectExtend,
+		params = {url: metadata["ht:news_item"][0]["ht:news_item_url"][0]};
+
+		return ajaxProvider({url}).then(({data}) => {
+			console.log({data});
+			return data;
 		});
 
-		console.log({metadata});
-		//{url: }
-		return Promise.resolve(metadata);
+		/*return ajaxProvider({url}).then(({data}) => {
+			var articleObject = objectExtend(metadata)(data)();
+			console.log({articleObject})
+			return articleObject;
+		});*/
 	}
 
 	APP["resolve-map"] = {fetchTrendingSearches, fetchArticle}
@@ -686,6 +692,56 @@ Container.modules["url-provider"] = function(APP) {
 	return;
 };
 
+/*--- core.utils.js ---*/
+
+/*globals Container */
+
+Container.modules["utils"] = function(APP) { 
+	
+	function objectExtend(target) {
+		var extObj,
+		dupSourceObj;
+		extObj = Object.keys(target).reduce(copyObject(target), {});
+
+		function hasKeys(context) {
+	      		return (function(element) {
+	        		return this.includes(element);
+	      		}).bind(context);
+    		}
+
+		function copyObject(context) {
+			return (function(map, currVal) {
+				map[currVal] = this[currVal];
+				return map;
+			}).bind(context);
+		}
+
+		return function(source) {
+			dupSourceObj = Object.keys(source)
+					.reduce(copyObject(source), {});
+
+			return function(propsList) {
+          			if(arguments.length !== 0) { 
+           				Object.keys(dupSourceObj)
+           				.filter(hasKeys(propsList))
+              				.reduce(copyObject(
+              					dupSourceObj), extObj);
+          			} else {
+            				//console.log("no args")
+            				Object.keys(dupSourceObj)
+            				.reduce(copyObject(
+            					dupSourceObj), extObj);
+          			}
+          			return extObj;
+        		};
+      		};
+	}
+
+
+
+	APP["utils"] = {objectExtend};
+	return
+};
 
 
 /*! jQuery v2.1.1 -css,-css/addGetHookIf,-css/curCSS,-css/defaultDisplay,-css/hiddenVisibleSelectors,-css/support,-css/swap,-css/var/cssExpand,-css/var/getStyles,-css/var/isHidden,-css/var/rmargin,-css/var/rnumnonpx,-effects,-effects/Tween,-effects/animatedSelector,-dimensions,-offset,-deprecated,-event-alias,-wrap | (c) 2005, 2014 jQuery Foundation, Inc. | jquery.org/license */

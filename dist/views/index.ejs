@@ -1,10 +1,15 @@
 <div class="content-area content-area-custom">
-
+	<% function truncate(string) {
+			if (string.length > 23) {
+				return `${string.slice(0, 23)}...`
+			}
+			return string;
+    } %>
 	<section class="row row-custom">
 
 		<div class="col-lg-5 col-md-8 col-sm-12 col-xs-12">
 			<% data.forEach(function(item, index)  { %>
-				<section class="card">
+				<section class="card" style="margin-bottom: 15px;">
 					<div class="card-header card-header-custom"><%=item["ht:approx_traffic"][0]%> searches
 				</div><!-- .card-header -->
 
@@ -26,7 +31,7 @@
 
 				<div class="card-footer">
 					<a href="#/article?id=<%=index%>" <button class="btn btn-sm">Read More</button></a>
-					<span style="float: right; font-weight: 600;"><%=item["ht:news_item"][0]["ht:news_item_source"][0]%></span>
+					<span style="float: right; font-weight: 600;"><%=truncate(item["ht:news_item"][0]["ht:news_item_source"][0])%></span>
 				</div>
 
 			</section><!-- .card -->
