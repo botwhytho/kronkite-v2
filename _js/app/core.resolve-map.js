@@ -10,10 +10,10 @@ Container.modules["resolve-map"] = function({require, set}) {
 		}
 	}
 
-	function getCachedArticles(hasArticles) {
+	function getFeedData(hasArticles) {
 		if (hasArticles) {
-			//retrieves cached articles from object returned from the notification.
-			var data = pushEvent(["getCachedArticles"])();
+			//retrieves cached feed from object returned from the notification.
+			var data = pushEvent(["getCachedFeed"])();
 			return Promise.resolve(data);
 		} 
 	}
@@ -29,19 +29,29 @@ Container.modules["resolve-map"] = function({require, set}) {
 
 		try {
 			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
-			return getCachedArticles(pushEvent(["checkHasArticles"])());
+			return getFeedData(pushEvent(["checkHasFeed"])());
 		} catch(e) {
 			//console.error(e);
 			return ajaxProvider({url}).then(onFeedResponse);
 		} 
 	}
 
+	function fetchTrendingVideos() {
+		//var url = require(["url-provider"]).setAPIURL("videos");
+		var url = "./sample-youtube-data.json";
+
+		return ajaxProvider({url}).then(function({data}) {
+			console.log("data:", data);
+			return data;
+		});
+	}
+
 	function fetchArticle({id}) {
-		var metadata = pushEvent(["getArticleMetadata"])(id),
+		var feedItemData = pushEvent(["getFeedItem"])(id),
 		//url = require(["url-provider"]).setAPIURL("article"),
 		url = "./sample-data.json",
 		objectExtend = require(["utils"]).objectExtend,
-		params = {url: metadata["ht:news_item"][0]["ht:news_item_url"][0]};
+		params = {url: feedItemData.getURL()};
 		
 		return ajaxProvider({url}).then(({data}) => {
 			console.log({data});
@@ -55,6 +65,10 @@ Container.modules["resolve-map"] = function({require, set}) {
 		});*/
 	}
 
-	set("resolve-map")({fetchTrendingSearches, fetchArticle})
+	set("resolve-map")({fetchTrendingSearches, 
+			fetchTrendingVideos,
+			fetchArticle
+	})
+
 	return;
 }

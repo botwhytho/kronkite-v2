@@ -7,20 +7,30 @@ Container.modules["articles-feed"] = function({require, set}) {
 	articlesList,
 	broadcast = require(["broadcast"]),
 	eventList = [
-		{event: "checkHasArticles", action: checkHasArticles},
-		{event: "getCachedArticles", action: getCachedArticles},
-		{event: "getArticleMetadata", action: findArticle}
+		{event: "checkHasFeed", action: checkHasFeed},
+		{event: "getCachedFeed", action: getCachedFeed},
+		{event: "getFeedItem", action: findFeedItem}
 	];
 
-	function findArticle(id) {
-		return articlesList.getModel()[id];
+	function findFeedItem(id) {
+		var item = articlesList.getModel()[id];
+		
+		function getURL() {
+			return item["ht:news_item"][0]["ht:news_item_url"][0];
+		}
+
+		function getALL() {
+			return item;
+		}
+
+		return {getURL, getALL}
 	}
 
-	function checkHasArticles(args) {
+	function checkHasFeed(args) {
 		return articlesList.getModel().length !== 0;
 	}
 
-	function getCachedArticles() {
+	function getCachedFeed() {
 		return articlesList.getModel();
 	}
 

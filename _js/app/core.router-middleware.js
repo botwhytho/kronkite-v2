@@ -35,6 +35,10 @@ Container.modules["router-middleware"] = function({require, set}) {
 			showHideHeaderBarChrome("hide");
 			return;
 			
+		},
+		"/video": function() {
+			showHideHeaderBarChrome("hide");
+			return;
 		}
 	};
 

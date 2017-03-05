@@ -1,0 +1,48 @@
+<div class="content-area content-area-custom">
+	<% function truncate(string, slicePt) {
+			if(string.length < slicePt) {return string;}
+
+			if (!slicePt) {
+				return `${string.slice(0, 63)}...`
+			} else {
+				return `${string.slice(0, slicePt)}...`
+			}
+			return string;
+    } %>
+	<section class="row row-custom">
+
+		<div class="col-lg-5 col-md-8 col-sm-12 col-xs-12">
+			<% data["items"].forEach(function(item, index) { %>
+				
+			<section class="card" style="margin-bottom: 15px;">
+					<div class="card-header card-header-custom"> <%=parseInt(item["statistics"]["viewCount"]).toLocaleString()%> views
+				</div><!-- .card-header -->
+
+				<div class="card-block">
+					<div class="card-title card-title-custom video-title"><%=item["snippet"]["title"]%> </div>
+
+					<div class="card-img card-img-custom">
+						<section class="video-container"><img src="<%=item["snippet"]["thumbnails"]["medium"]["url"]%>"></section>
+					</div>
+
+					<div class="card-text card-text-custom">
+						<%=truncate(item["snippet"]["description"])%>
+						
+						<!-- Article snippet begins here... -->
+					</div>
+
+				</div><!-- .card-block -->
+
+				<div class="card-footer">
+					<a href="#/article?id=" <button class="btn btn-sm">Watch</button></a>
+					<span style="float: right; font-weight: 600;"><%=truncate(item["snippet"]["channelTitle"], 25)%></span>
+				</div>
+
+			</section><!-- .card -->
+			<% }) %>
+
+		</div>
+
+	</section><!-- .row -->
+
+</div><!-- .content-area -->

@@ -27,9 +27,10 @@ Container.modules["route-table"] = function(APP) {
 			}
 		},
 		{
-			path: "/lunch-order",
-			templateFilePath: "lunch-order-view.ejs",
-			resolve: null,
+			path: "/videos",
+			templateFilePath: "videos-view.ejs",
+			middleware: null,
+			resolve: APP.require(["resolve-map"]).fetchTrendingVideos,
 			controller: function(data) {
 							
 			}
