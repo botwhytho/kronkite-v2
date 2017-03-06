@@ -7,9 +7,9 @@ Container.modules["articles-feed"] = function({require, set}) {
 	articlesList,
 	broadcast = require(["broadcast"]),
 	eventList = [
-		{event: "checkHasFeed", action: checkHasFeed},
-		{event: "getCachedFeed", action: getCachedFeed},
-		{event: "getFeedItem", action: findFeedItem}
+		{event: "check-has-search-feed", action: checkHasFeed},
+		{event: "get-cached-search-feed", action: getCachedFeed},
+		{event: "get-search-feed-item", action: findFeedItem}
 	];
 
 	function findFeedItem(id) {

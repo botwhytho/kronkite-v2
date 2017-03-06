@@ -7,7 +7,7 @@ Container.modules["url-provider"] = function({require, set}) {
 	route,
 	endpointMap = {
 		search: "trending-search",
-		videos: "trending-videos",
+		videos: "videos",
 		music: "trending-music",
 		article: "article"
 	};

@@ -10,44 +10,46 @@ Container.modules["resolve-map"] = function({require, set}) {
 		}
 	}
 
-	function getFeedData(hasArticles) {
-		if (hasArticles) {
-			//retrieves cached feed from object returned from the notification.
-			var data = pushEvent(["getCachedFeed"])();
-			return Promise.resolve(data);
-		} 
+	function getFeed(hasFeed) {
+		return function(feedType) {
+			var getCachedFeed = `get-cached-${feedType}-feed`,
+			data;
+
+			if (hasFeed) {
+				//retrieves cached feed from object returned from the notification.
+				data = pushEvent([getCachedFeed])();
+				return Promise.resolve(data);
+			} 
+		}
 	}
+	
 
 	/*--- END Utility Functions ---*/
 
-	function fetchTrendingSearches() {
-		var url = require(["url-provider"]).setAPIURL("search");
-
-		function onFeedResponse({data}) {
-			return data.rss.channel[0].item;
-		}
+	function fetchFeed(feedType) {
+		var url = require(["url-provider"]).setAPIURL(feedType),
+		responseMap = {
+			search: function({data}) {
+					return data.rss.channel[0].item;
+				},
+			videos: function({data}) {
+					console.log("data:", data);
+					return data;
+				}
+		},
+		checkHasFeed = `check-has-${feedType}-feed`;
 
 		try {
 			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
-			return getFeedData(pushEvent(["checkHasFeed"])());
+			return getFeed(pushEvent([checkHasFeed])())(feedType);
 		} catch(e) {
 			//console.error(e);
-			return ajaxProvider({url}).then(onFeedResponse);
-		} 
-	}
-
-	function fetchTrendingVideos() {
-		//var url = require(["url-provider"]).setAPIURL("videos");
-		var url = "./sample-youtube-data.json";
-
-		return ajaxProvider({url}).then(function({data}) {
-			console.log("data:", data);
-			return data;
-		});
+			return ajaxProvider({url}).then(responseMap[feedType]);
+		}
 	}
 
 	function fetchArticle({id}) {
-		var feedItemData = pushEvent(["getFeedItem"])(id),
+		var feedItemData = pushEvent(["get-search-feed-item"])(id),
 		//url = require(["url-provider"]).setAPIURL("article"),
 		url = "./sample-data.json",
 		objectExtend = require(["utils"]).objectExtend,
@@ -65,10 +67,7 @@ Container.modules["resolve-map"] = function({require, set}) {
 		});*/
 	}
 
-	set("resolve-map")({fetchTrendingSearches, 
-			fetchTrendingVideos,
-			fetchArticle
-	})
+	set("resolve-map")({fetchFeed, fetchArticle})
 
 	return;
 }

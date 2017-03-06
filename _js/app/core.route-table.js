@@ -1,17 +1,19 @@
 /*--- core.route-table.js ---*/
 
-Container.modules["route-table"] = function(APP) {
+Container.modules["route-table"] = function({require, set}) {
 
-	APP.set("route-table")([
+	set("route-table")([
 		{
 			path: "/",
 			templateFilePath: "index.ejs",
 			middleware: function() { 
-				APP["router-middleware"]["/"]();
+				require(["router-middleware"])["/"]();
 			},
-			resolve: APP.require(["resolve-map"]).fetchTrendingSearches,
+			resolve: function() {
+				return require(["resolve-map"]).fetchFeed("search");
+			},
 			controller: function(modules, data) {
-				APP.start(["articles-feed"])(data);
+				require(["start"])(["articles-feed"])(data);
 				console.log("modules", modules);
 			}
 		},
@@ -19,9 +21,9 @@ Container.modules["route-table"] = function(APP) {
 			path: "/article",
 			templateFilePath: "article-view.ejs",
 			middleware: function(){
-				APP["router-middleware"]["/article"]();	
+				require(["router-middleware"])["/article"]();
 			},
-			resolve: APP.require(["resolve-map"]).fetchArticle,
+			resolve: require(["resolve-map"]).fetchArticle,
 			controller: function(modules, data) {
 				
 			}
@@ -30,14 +32,16 @@ Container.modules["route-table"] = function(APP) {
 			path: "/videos",
 			templateFilePath: "videos-view.ejs",
 			middleware: null,
-			resolve: APP.require(["resolve-map"]).fetchTrendingVideos,
+			resolve: function() {
+				return require(["resolve-map"]).fetchFeed("videos");
+			},
 			controller: function(data) {
 							
 			}
 		},
 		{
-			path: "/orders-view",
-			templateFilePath: "orders-view.ejs",
+			path: "/video",
+			templateFilePath: "video-view.ejs",
 			resolve: null,
 			controller: function(data) {
 
