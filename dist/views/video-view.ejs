@@ -9,7 +9,7 @@
 } %>
     <header class="header header-6 header-custom">
     <span class="clr-icon-return-to-home">
-        <a href="#/"><clr-icon shape="circle-arrow left" class="clr-icon-circle-arrow-left"></a>
+        <a href="#/videos"><clr-icon shape="circle-arrow left" class="clr-icon-circle-arrow-left"></a>
         </clr-icon>
     </span>
     <div class="video-marquee" data-title="">
@@ -17,12 +17,22 @@
     </span>
     </header>
     <div class="content-container">
-        <div class="content-area video-view">
-        	<div> </div>
+        <div class="content-area content-area-custom video-view">
+        	<div class="row row-custom">
+			    <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+			        <a href="..." class="card">
+			            <div class="card-img">
+			             <iframe src="https://www.youtube.com/embed/<%=data["id"]%>" width="320" height="180" frameborder="0" allowfullscreen></iframe>
+			            </div>
+			            <div class="card-block">
+			                <p class="card-text">
+			                    <%=data["snippet"]["description"]%>
+			                </p>
+			            </div>
+			        </a>
+			    </div>
+			</div>
         	<div style="border-bottom: 5px dotted black; margin: 10px 55px 10px 0px;"></div>
-			<section>
-                <div><img src="<%=data["snippet"]["thumbnails"]["medium"]["url"]%>"></div>
-            </section>
-        </div>
+		</div>
     </div>
 </div>

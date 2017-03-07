@@ -3,7 +3,7 @@
 /* globals Container */
 
 new Container(["*"], function start(APP) {
-	APP.start(["config", "router", "model"])({
+	APP.start(["config", "router", "model", "core-events"])({
 		environment: "debug",
 		remoteDebug: false,
 		routeMap: {

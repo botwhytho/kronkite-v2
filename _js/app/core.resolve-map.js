@@ -82,11 +82,13 @@ Container.modules["resolve-map"] = function({require, set}) {
 				}).then(({data}) => {
 				console.log({data});
 				return data;
-			});
-
-
+				});
 			}
-
+			/*return ajaxProvider({url}).then(({data}) => {
+			var articleObject = objectExtend(metadata)(data)();
+			console.log({articleObject})
+			return articleObject;
+		});*/
 
 			return validateRequestedResource({
 				type: resourceType,
@@ -96,30 +98,7 @@ Container.modules["resolve-map"] = function({require, set}) {
 		}
 	}
 
-	function fetchArticle({id}) {
-		var feedItemData = pushEvent(["get-search-feed-item"])(id),
-		//url = require(["url-provider"]).setAPIURL("article"),
-		url = "./sample-data.json",
-		objectExtend = require(["utils"]).objectExtend,
-		params = {url: feedItemData.getURL()};
-		
-		return ajaxProvider({url}).then(({data}) => {
-			console.log({data});
-			return data;
-		});
-
-		/*return ajaxProvider({url}).then(({data}) => {
-			var articleObject = objectExtend(metadata)(data)();
-			console.log({articleObject})
-			return articleObject;
-		});*/
-	}
-
-	function fetchVideo({id}) {
-
-	}
-
-	set("resolve-map")({fetchFeed, fetchArticle, fetchResource})
+	set("resolve-map")({fetchFeed, fetchResource})
 
 	return;
 }

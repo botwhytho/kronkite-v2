@@ -379,6 +379,40 @@ Container.modules.broadcast = function({require, set}) {
 	set("broadcast")({notify, listen});
 };
 
+/*--- core.events.js ---*/
+
+/*globals Container */
+
+Container.modules["core-events"] = function({require, set}) {
+var $$$ = document.querySelectorAll.bind(document)
+
+function navItemControl() {
+	var navItems = Array.from($$$("body a.nav-link"));
+	
+	navItems.forEach(function(item) {
+		item.addEventListener("click", function(e) {
+			navItems.forEach(function(item) {
+				item.classList.remove("active");
+			});
+
+			e.target.classList.add("active");
+		});	
+	});
+	return;
+}
+
+function startCoreEventListeners() {
+	navItemControl();
+}
+
+function start(args) {
+	startCoreEventListeners();
+}
+
+return {moduleName: "core-events", startFn: start};
+
+};
+
 /*--- core.resolve-map.js ---*/
 
 Container.modules["resolve-map"] = function({require, set}) {
@@ -463,11 +497,13 @@ Container.modules["resolve-map"] = function({require, set}) {
 				}).then(({data}) => {
 				console.log({data});
 				return data;
-			});
-
-
+				});
 			}
-
+			/*return ajaxProvider({url}).then(({data}) => {
+			var articleObject = objectExtend(metadata)(data)();
+			console.log({articleObject})
+			return articleObject;
+		});*/
 
 			return validateRequestedResource({
 				type: resourceType,
@@ -477,30 +513,7 @@ Container.modules["resolve-map"] = function({require, set}) {
 		}
 	}
 
-	function fetchArticle({id}) {
-		var feedItemData = pushEvent(["get-search-feed-item"])(id),
-		//url = require(["url-provider"]).setAPIURL("article"),
-		url = "./sample-data.json",
-		objectExtend = require(["utils"]).objectExtend,
-		params = {url: feedItemData.getURL()};
-		
-		return ajaxProvider({url}).then(({data}) => {
-			console.log({data});
-			return data;
-		});
-
-		/*return ajaxProvider({url}).then(({data}) => {
-			var articleObject = objectExtend(metadata)(data)();
-			console.log({articleObject})
-			return articleObject;
-		});*/
-	}
-
-	function fetchVideo({id}) {
-
-	}
-
-	set("resolve-map")({fetchFeed, fetchArticle, fetchResource})
+	set("resolve-map")({fetchFeed, fetchResource})
 
 	return;
 }
@@ -509,52 +522,60 @@ Container.modules["resolve-map"] = function({require, set}) {
 
 Container.modules["route-table"] = function({require, set}) {
 
-	set("route-table")([
-		{
-			path: "/",
-			templateFilePath: "index.ejs",
-			middleware: function() { 
-				require(["router-middleware"])["/"]();
-			},
-			resolve: function() {
-				return require(["resolve-map"]).fetchFeed("search");
-			},
-			controller: function(modules, data) {
-				require(["start"])(["articles-feed"])(data);
-			}
+var routeTable = [
+	{
+		path: "/",
+		templateFilePath: "index.ejs",
+		middleware: function() { 
+			require(["router-middleware"])["/"]();
 		},
-		{
-			path: "/article",
-			templateFilePath: "article-view.ejs",
-			middleware: function(){
-				require(["router-middleware"])["/article"]();
-			},
-			resolve: require(["resolve-map"]).fetchResource("search"),
-			controller: function(modules, data) {
-				
-			}
+		resolve: function() {
+			return require(["resolve-map"]).fetchFeed("search");
 		},
-		{
-			path: "/videos",
-			templateFilePath: "videos-view.ejs",
-			middleware: null,
-			resolve: function() {
-				return require(["resolve-map"]).fetchFeed("videos");
-			},
-			controller: function(modules, data) {
-				require(["start"])(["videos-feed"])(data);
-			}
-		},
-		{
-			path: "/video",
-			templateFilePath: "video-view.ejs",
-			resolve: require(["resolve-map"]).fetchResource("videos"),
-			controller: function(data) {
-
-			}
+		controller: function(modules, data) {
+			require(["start"])(["articles-feed"])(data);
 		}
-	]);
-	return;
+	},
+	{
+		path: "/article",
+		templateFilePath: "article-view.ejs",
+		middleware: function(){
+			require(["router-middleware"])["/article"]();
+		},
+		resolve: require(["resolve-map"]).fetchResource("search"),
+		controller: function(modules, data) {
+			
+		}
+	},
+	{
+		path: "/videos",
+		templateFilePath: "videos-view.ejs",
+		middleware: function() {
+			require(["router-middleware"])["/videos"]()	
+		},
+		resolve: function() {
+			return require(["resolve-map"]).fetchFeed("videos");
+		},
+		controller: function(modules, data) {
+			require(["start"])(["videos-feed"])(data);
+		}
+	},
+	{
+		path: "/video",
+		templateFilePath: "video-view.ejs",
+		middleware: function() {
+			require(["router-middleware"])["/video"]();
+		},
+		resolve: require(["resolve-map"]).fetchResource("videos"),
+		controller: function(data) {
+
+		}
+	}
+];
+
+set("route-table")(routeTable);
+return;
+
 }
 /*--- core.router-middleware.js ---*/
 
@@ -562,46 +583,51 @@ Container.modules["route-table"] = function({require, set}) {
 
 Container.modules["router-middleware"] = function({require, set}) {
 
-	var routeMap,
-	$$ = document.querySelector.bind(document);
-	
-	function showHideHeaderBarChrome(action) {
-		var headerChrome = [$$(".header-container-custom"),
-		$$(".content-container.content-container-custom")
-		];
+var routeMap,
+$$ = document.querySelector.bind(document);
 
-	
-		if (action === "hide") {
-			headerChrome.forEach((element) => {
-				element.dataset.currentView = "article";
-			});
-		} else {
-			headerChrome.forEach((element) => {
-				element.dataset.currentView = "null";
-			});
-		}
+function showHideHeaderBarChrome(action) {
+	var headerChrome = [$$(".header-container-custom"),
+	$$(".content-container.content-container-custom")
+	];
+
+
+	if (action === "hide") {
+		headerChrome.forEach((element) => {
+			element.dataset.currentView = "article";
+		});
+	} else {
+		headerChrome.forEach((element) => {
+			element.dataset.currentView = "null";
+		});
 	}
+}
 
 
-	routeMap = {
-		"/": function() {
-			showHideHeaderBarChrome("show");
-			return;
+routeMap = {
+	"/": function() {
+		showHideHeaderBarChrome("show");
+		return;
 
-		},
-		"/article": function() {
-			showHideHeaderBarChrome("hide");
-			return;
-			
-		},
-		"/video": function() {
-			showHideHeaderBarChrome("hide");
-			return;
-		}
-	};
+	},
+	"/article": function() {
+		showHideHeaderBarChrome("hide");
+		return;
+		
+	},
+	"/video": function() {
+		showHideHeaderBarChrome("hide");
+		return;
+	},
+	"/videos": function() {
+		showHideHeaderBarChrome("show");
+		return;
+	}
+};
 
-	set("router-middleware")(routeMap);
-	return;
+set("router-middleware")(routeMap);
+return;
+
 };
 
 /*--- core.router-service.js ---*/
@@ -847,7 +873,6 @@ Container.modules["videos-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
-		console.log("videosList:", videosList.getModel());
 		broadcast.listen(eventList);
 		return;
 	}
@@ -860,7 +885,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 /* globals Container */
 
 new Container(["*"], function start(APP) {
-	APP.start(["config", "router", "model"])({
+	APP.start(["config", "router", "model", "core-events"])({
 		environment: "debug",
 		remoteDebug: false,
 		routeMap: {
