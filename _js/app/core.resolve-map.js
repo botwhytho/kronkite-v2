@@ -22,8 +22,22 @@ Container.modules["resolve-map"] = function({require, set}) {
 			} 
 		}
 	}
-	
 
+	function validateRequestedResource({type, data, fn}) {
+		var resourceXHRList = ["search"],
+		resourceMap = {
+			search: function(metadata) {
+				return {url: metadata.getURL()}
+			}	
+		};	
+		
+		if (!resourceXHRList.includes(type)) {
+			return Promise.resolve(data);
+		}
+
+		return fn(resourceMap[type](data));
+	}
+	
 	/*--- END Utility Functions ---*/
 
 	function fetchFeed(feedType) {
@@ -33,7 +47,7 @@ Container.modules["resolve-map"] = function({require, set}) {
 					return data.rss.channel[0].item;
 				},
 			videos: function({data}) {
-					console.log("data:", data);
+					//console.log("data:", data);
 					return data;
 				}
 		},
@@ -45,6 +59,40 @@ Container.modules["resolve-map"] = function({require, set}) {
 		} catch(e) {
 			//console.error(e);
 			return ajaxProvider({url}).then(responseMap[feedType]);
+		}
+	}
+
+	function fetchResource(resourceType) {
+		return function({id}) {
+			var getFeedItem = `get-${resourceType}-feed-item`,
+			//url = require(["url-provider"]).setAPIURL(resourceType),
+			feedItemData = pushEvent([getFeedItem])(id),
+			/*remove in production*/
+			mockResourceMap = {
+				search: "./sample-data.json",
+				videos: "./sample-youtube-data.json"
+			};
+			/*remove in production*/
+			console.log("Mock resource(s) in use. Remove in production.")
+
+			function resourceXHR(data) {
+				return ajaxProvider({
+					url: mockResourceMap[resourceType],
+					data
+				}).then(({data}) => {
+				console.log({data});
+				return data;
+			});
+
+
+			}
+
+
+			return validateRequestedResource({
+				type: resourceType,
+				data: feedItemData,
+				fn: resourceXHR
+			});	
 		}
 	}
 
@@ -67,7 +115,11 @@ Container.modules["resolve-map"] = function({require, set}) {
 		});*/
 	}
 
-	set("resolve-map")({fetchFeed, fetchArticle})
+	function fetchVideo({id}) {
+
+	}
+
+	set("resolve-map")({fetchFeed, fetchArticle, fetchResource})
 
 	return;
 }

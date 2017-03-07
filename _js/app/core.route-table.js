@@ -14,7 +14,6 @@ Container.modules["route-table"] = function({require, set}) {
 			},
 			controller: function(modules, data) {
 				require(["start"])(["articles-feed"])(data);
-				console.log("modules", modules);
 			}
 		},
 		{
@@ -23,7 +22,7 @@ Container.modules["route-table"] = function({require, set}) {
 			middleware: function(){
 				require(["router-middleware"])["/article"]();
 			},
-			resolve: require(["resolve-map"]).fetchArticle,
+			resolve: require(["resolve-map"]).fetchResource("search"),
 			controller: function(modules, data) {
 				
 			}
@@ -35,14 +34,14 @@ Container.modules["route-table"] = function({require, set}) {
 			resolve: function() {
 				return require(["resolve-map"]).fetchFeed("videos");
 			},
-			controller: function(data) {
-							
+			controller: function(modules, data) {
+				require(["start"])(["videos-feed"])(data);
 			}
 		},
 		{
 			path: "/video",
 			templateFilePath: "video-view.ejs",
-			resolve: null,
+			resolve: require(["resolve-map"]).fetchResource("videos"),
 			controller: function(data) {
 
 			}

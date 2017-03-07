@@ -403,8 +403,22 @@ Container.modules["resolve-map"] = function({require, set}) {
 			} 
 		}
 	}
-	
 
+	function validateRequestedResource({type, data, fn}) {
+		var resourceXHRList = ["search"],
+		resourceMap = {
+			search: function(metadata) {
+				return {url: metadata.getURL()}
+			}	
+		};	
+		
+		if (!resourceXHRList.includes(type)) {
+			return Promise.resolve(data);
+		}
+
+		return fn(resourceMap[type](data));
+	}
+	
 	/*--- END Utility Functions ---*/
 
 	function fetchFeed(feedType) {
@@ -414,7 +428,7 @@ Container.modules["resolve-map"] = function({require, set}) {
 					return data.rss.channel[0].item;
 				},
 			videos: function({data}) {
-					console.log("data:", data);
+					//console.log("data:", data);
 					return data;
 				}
 		},
@@ -426,6 +440,40 @@ Container.modules["resolve-map"] = function({require, set}) {
 		} catch(e) {
 			//console.error(e);
 			return ajaxProvider({url}).then(responseMap[feedType]);
+		}
+	}
+
+	function fetchResource(resourceType) {
+		return function({id}) {
+			var getFeedItem = `get-${resourceType}-feed-item`,
+			//url = require(["url-provider"]).setAPIURL(resourceType),
+			feedItemData = pushEvent([getFeedItem])(id),
+			/*remove in production*/
+			mockResourceMap = {
+				search: "./sample-data.json",
+				videos: "./sample-youtube-data.json"
+			};
+			/*remove in production*/
+			console.log("Mock resource(s) in use. Remove in production.")
+
+			function resourceXHR(data) {
+				return ajaxProvider({
+					url: mockResourceMap[resourceType],
+					data
+				}).then(({data}) => {
+				console.log({data});
+				return data;
+			});
+
+
+			}
+
+
+			return validateRequestedResource({
+				type: resourceType,
+				data: feedItemData,
+				fn: resourceXHR
+			});	
 		}
 	}
 
@@ -448,7 +496,11 @@ Container.modules["resolve-map"] = function({require, set}) {
 		});*/
 	}
 
-	set("resolve-map")({fetchFeed, fetchArticle})
+	function fetchVideo({id}) {
+
+	}
+
+	set("resolve-map")({fetchFeed, fetchArticle, fetchResource})
 
 	return;
 }
@@ -469,7 +521,6 @@ Container.modules["route-table"] = function({require, set}) {
 			},
 			controller: function(modules, data) {
 				require(["start"])(["articles-feed"])(data);
-				console.log("modules", modules);
 			}
 		},
 		{
@@ -478,7 +529,7 @@ Container.modules["route-table"] = function({require, set}) {
 			middleware: function(){
 				require(["router-middleware"])["/article"]();
 			},
-			resolve: require(["resolve-map"]).fetchArticle,
+			resolve: require(["resolve-map"]).fetchResource("search"),
 			controller: function(modules, data) {
 				
 			}
@@ -490,14 +541,14 @@ Container.modules["route-table"] = function({require, set}) {
 			resolve: function() {
 				return require(["resolve-map"]).fetchFeed("videos");
 			},
-			controller: function(data) {
-							
+			controller: function(modules, data) {
+				require(["start"])(["videos-feed"])(data);
 			}
 		},
 		{
-			path: "/orders-view",
-			templateFilePath: "orders-view.ejs",
-			resolve: null,
+			path: "/video",
+			templateFilePath: "video-view.ejs",
+			resolve: require(["resolve-map"]).fetchResource("videos"),
 			controller: function(data) {
 
 			}
@@ -631,10 +682,10 @@ Container.modules["url-provider"] = function({require, set}) {
 	var currentEnvironment,
 	route,
 	endpointMap = {
+		article: "article",
 		search: "trending-search",
-		videos: "videos",
 		music: "trending-music",
-		article: "article"
+		videos: "videos"
 	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {
@@ -765,6 +816,45 @@ Container.modules["articles-feed"] = function({require, set}) {
 
 	return {moduleName: "articles-feed", startFn: start};
 };
+
+/*--- module.videos-feed.js ---*/
+
+/*globals Container */
+
+Container.modules["videos-feed"] = function({require, set}) {
+	var Model,
+	videosList,
+	broadcast = require(["broadcast"]),
+	eventList = [
+		{event: "check-has-videos-feed", action: checkHasFeed},
+		{event: "get-cached-videos-feed", action: getCachedFeed},
+		{event: "get-videos-feed-item", action: findFeedItem}
+	];
+	
+	function findFeedItem(id) {
+		var item = videosList.getModel()[id];
+		return item;
+	}
+
+	function checkHasFeed(args) {
+		return videosList.getModel().length !== 0;
+	}
+
+	function getCachedFeed() {
+		return videosList.getModel();
+	}
+
+	function start(currentFeed) {
+		Model = require(["constructor-model"]);
+		videosList = new Model(currentFeed);
+		console.log("videosList:", videosList.getModel());
+		broadcast.listen(eventList);
+		return;
+	}
+
+	return {moduleName: "videos-feed", startFn: start};
+};
+
 /*--- start.js ---*/
 
 /* globals Container */

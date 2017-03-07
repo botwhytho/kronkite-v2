@@ -6,10 +6,10 @@ Container.modules["url-provider"] = function({require, set}) {
 	var currentEnvironment,
 	route,
 	endpointMap = {
+		article: "article",
 		search: "trending-search",
-		videos: "videos",
 		music: "trending-music",
-		article: "article"
+		videos: "videos"
 	};
 
 	function setEnvironment({environment, routeMap, remoteDebug}) {

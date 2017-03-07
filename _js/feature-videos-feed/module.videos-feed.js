@@ -12,11 +12,24 @@ Container.modules["videos-feed"] = function({require, set}) {
 		{event: "get-videos-feed-item", action: findFeedItem}
 	];
 	
+	function findFeedItem(id) {
+		var item = videosList.getModel()[id];
+		return item;
+	}
+
+	function checkHasFeed(args) {
+		return videosList.getModel().length !== 0;
+	}
+
+	function getCachedFeed() {
+		return videosList.getModel();
+	}
+
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
 		console.log("videosList:", videosList.getModel());
-		//broadcast.listen(eventList);
+		broadcast.listen(eventList);
 		return;
 	}
 
