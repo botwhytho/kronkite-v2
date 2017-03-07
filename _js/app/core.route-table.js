@@ -22,7 +22,10 @@ var routeTable = [
 		middleware: function(){
 			require(["router-middleware"])["/article"]();
 		},
-		resolve: require(["resolve-map"]).fetchResource("search"),
+		resolve: require(["resolve-map"]).fetchResource({
+			feedType: "search", 
+			resource: "article"
+		}),
 		controller: function(modules, data) {
 			
 		}
@@ -46,7 +49,10 @@ var routeTable = [
 		middleware: function() {
 			require(["router-middleware"])["/video"]();
 		},
-		resolve: require(["resolve-map"]).fetchResource("videos"),
+		resolve: require(["resolve-map"]).fetchResource({
+			feedType: "videos",
+			resource: "videos"
+		}),
 		controller: function(data) {
 
 		}

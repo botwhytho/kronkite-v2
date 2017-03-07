@@ -28,6 +28,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
+		console.log({videosList});
 		broadcast.listen(eventList);
 		return;
 	}

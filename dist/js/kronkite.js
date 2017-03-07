@@ -416,106 +416,99 @@ return {moduleName: "core-events", startFn: start};
 /*--- core.resolve-map.js ---*/
 
 Container.modules["resolve-map"] = function({require, set}) {
-	var ajaxProvider = require(["ajax-provider"]),
-	broadcast = require(["broadcast"]);
 
-	function pushEvent(event) {
-		return function(data) {
-			return broadcast.notify([event])(data)[event];
-		}
+var ajaxProvider = require(["ajax-provider"]),
+broadcast = require(["broadcast"]);
+
+function pushEvent(event) {
+	return function(data) {
+		return broadcast.notify([event])(data)[event];
 	}
+}
 
-	function getFeed(hasFeed) {
-		return function(feedType) {
-			var getCachedFeed = `get-cached-${feedType}-feed`,
-			data;
-
-			if (hasFeed) {
-				//retrieves cached feed from object returned from the notification.
-				data = pushEvent([getCachedFeed])();
-				return Promise.resolve(data);
-			} 
-		}
+function resourceXHR(url) {
+	return function({params, feedItemData}) {
+		return ajaxProvider({url, data: params}).then(({data}) => {
+			return parseResponse(data, feedItemData);
+		});
 	}
+}
 
-	function validateRequestedResource({type, data, fn}) {
-		var resourceXHRList = ["search"],
-		resourceMap = {
-			search: function(metadata) {
-				return {url: metadata.getURL()}
-			}	
-		};	
-		
-		if (!resourceXHRList.includes(type)) {
+function getFeed(hasFeed) {
+	return function(feedType) {
+		var getCachedFeed = `get-cached-${feedType}-feed`, data;
+
+		if (hasFeed) {
+			//retrieves cached feed from object returned from the notification.
+			data = pushEvent([getCachedFeed])();
 			return Promise.resolve(data);
-		}
-
-		return fn(resourceMap[type](data));
+		} 
 	}
+}
+
+function parseResponse(data, feedItemData) {
+	console.log({data, feedData: feedItemData.getALL()});
+	var objectExtend = require(["utils"]).objectExtend,
+	responseObject = objectExtend(feedItemData.getALL())(data)();
+	console.log({responseObject});
+	return responseObject;
+}
+
+function validateRequestedResource({type, data, fn}) {
+	var resourceXHRList = ["search"],
+	resourceMap = {
+		search: function(metadata) {
+			return {url: metadata.getURL()}
+		}	
+	};	
 	
-	/*--- END Utility Functions ---*/
-
-	function fetchFeed(feedType) {
-		var url = require(["url-provider"]).setAPIURL(feedType),
-		responseMap = {
-			search: function({data}) {
-					return data.rss.channel[0].item;
-				},
-			videos: function({data}) {
-					//console.log("data:", data);
-					return data;
-				}
-		},
-		checkHasFeed = `check-has-${feedType}-feed`;
-
-		try {
-			//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
-			return getFeed(pushEvent([checkHasFeed])())(feedType);
-		} catch(e) {
-			//console.error(e);
-			return ajaxProvider({url}).then(responseMap[feedType]);
-		}
+	if (!resourceXHRList.includes(type)) {
+		return Promise.resolve(data);
 	}
 
-	function fetchResource(resourceType) {
-		return function({id}) {
-			var getFeedItem = `get-${resourceType}-feed-item`,
-			//url = require(["url-provider"]).setAPIURL(resourceType),
-			feedItemData = pushEvent([getFeedItem])(id),
-			/*remove in production*/
-			mockResourceMap = {
-				search: "./sample-data.json",
-				videos: "./sample-youtube-data.json"
-			};
-			/*remove in production*/
-			console.log("Mock resource(s) in use. Remove in production.")
+	return fn({params: resourceMap[type](data), feedItemData: data});
+}
 
-			function resourceXHR(data) {
-				return ajaxProvider({
-					url: mockResourceMap[resourceType],
-					data
-				}).then(({data}) => {
-				console.log({data});
+/*--- END Utility Functions ---*/
+
+function fetchFeed(feedType) {
+	var url = require(["url-provider"]).setAPIURL(feedType),
+	responseMap = {
+		search: function({data}) {
+				return data.rss.channel[0].item;
+			},
+		videos: function({data}) {
 				return data;
-				});
 			}
-			/*return ajaxProvider({url}).then(({data}) => {
-			var articleObject = objectExtend(metadata)(data)();
-			console.log({articleObject})
-			return articleObject;
-		});*/
+	},
+	checkHasFeed = `check-has-${feedType}-feed`;
 
-			return validateRequestedResource({
-				type: resourceType,
-				data: feedItemData,
-				fn: resourceXHR
-			});	
-		}
+	try {
+		//try/catch ensures fresh data is fetched if articles-feed module has not launched yet.
+		return getFeed(pushEvent([checkHasFeed])())(feedType);
+	} catch(e) {
+		//console.error(e);
+		return ajaxProvider({url}).then(responseMap[feedType]);
 	}
+}
 
-	set("resolve-map")({fetchFeed, fetchResource})
+function fetchResource({feedType, resource}) {
+	return function({id}) {
+		var getFeedItem = `get-${feedType}-feed-item`,
+		url = require(["url-provider"]).setAPIURL(resource),
+		feedItemData = pushEvent([getFeedItem])(id);
+			
+		return validateRequestedResource({
+			type: feedType,
+			data: feedItemData,
+			fn: resourceXHR(url)
+		});	
+	}
+}
 
-	return;
+set("resolve-map")({fetchFeed, fetchResource})
+return;
+
 }
 
 /*--- core.route-table.js ---*/
@@ -542,7 +535,10 @@ var routeTable = [
 		middleware: function(){
 			require(["router-middleware"])["/article"]();
 		},
-		resolve: require(["resolve-map"]).fetchResource("search"),
+		resolve: require(["resolve-map"]).fetchResource({
+			feedType: "search", 
+			resource: "article"
+		}),
 		controller: function(modules, data) {
 			
 		}
@@ -566,7 +562,10 @@ var routeTable = [
 		middleware: function() {
 			require(["router-middleware"])["/video"]();
 		},
-		resolve: require(["resolve-map"]).fetchResource("videos"),
+		resolve: require(["resolve-map"]).fetchResource({
+			feedType: "videos",
+			resource: "videos"
+		}),
 		controller: function(data) {
 
 		}
@@ -836,6 +835,7 @@ Container.modules["articles-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
+		console.log({articlesList});
 		broadcast.listen(eventList);
 		return;
 	}
@@ -873,6 +873,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
+		console.log({videosList});
 		broadcast.listen(eventList);
 		return;
 	}
