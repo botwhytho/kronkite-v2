@@ -48,6 +48,7 @@ var routeTable = [
 		templateFilePath: "video-view.ejs",
 		middleware: function() {
 			require(["router-middleware"])["/video"]();
+			window.scrollTo(0,0);
 		},
 		resolve: require(["resolve-map"]).fetchResource({
 			feedType: "videos",

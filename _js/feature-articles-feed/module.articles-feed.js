@@ -37,7 +37,7 @@ Container.modules["articles-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
-		console.log({articlesList});
+		console.log({articleList: articlesList.getModel()});
 		broadcast.listen(eventList);
 		return;
 	}

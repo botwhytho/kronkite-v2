@@ -447,10 +447,9 @@ function getFeed(hasFeed) {
 }
 
 function parseResponse(data, feedItemData) {
-	console.log({data, feedData: feedItemData.getALL()});
+	//What if data response is null? Hmm...?//
 	var objectExtend = require(["utils"]).objectExtend,
 	responseObject = objectExtend(feedItemData.getALL())(data)();
-	console.log({responseObject});
 	return responseObject;
 }
 
@@ -561,6 +560,7 @@ var routeTable = [
 		templateFilePath: "video-view.ejs",
 		middleware: function() {
 			require(["router-middleware"])["/video"]();
+			window.scrollTo(0,0);
 		},
 		resolve: require(["resolve-map"]).fetchResource({
 			feedType: "videos",
@@ -835,7 +835,7 @@ Container.modules["articles-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
-		console.log({articlesList});
+		console.log({articleList: articlesList.getModel()});
 		broadcast.listen(eventList);
 		return;
 	}
@@ -873,8 +873,8 @@ Container.modules["videos-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
-		console.log({videosList});
 		broadcast.listen(eventList);
+		window.scrollTo(0,0);
 		return;
 	}
 

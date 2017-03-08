@@ -32,6 +32,7 @@ function getFeed(hasFeed) {
 }
 
 function parseResponse(data, feedItemData) {
+	//What if data response is null? Hmm...?//
 	var objectExtend = require(["utils"]).objectExtend,
 	responseObject = objectExtend(feedItemData.getALL())(data)();
 	return responseObject;
