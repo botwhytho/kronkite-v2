@@ -878,7 +878,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 new Container(["*"], function start(APP) {
 	APP.start(["config", "router", "model", "core-events"])({
 		environment: "debug",
-		remoteDebug: false,
+		remoteDebug: true,
 		routeMap: {
 			debug: "http://localhost:8080/",
 			remoteDebug: "http://192.168.254.4:8080/",
