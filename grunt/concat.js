@@ -1,7 +1,6 @@
 module.exports = {
         debug: {
-                src: ["./_css/clarity-icons/clarity-icons.min.js",
-                	"./_js/app/**", 
+                src: [ 	"./_js/app/**", 
                 	"./_js/base/**", 
                 	"./_js/feature-articles-feed/**", 
                 	"./_js/feature-videos-feed/**", 
