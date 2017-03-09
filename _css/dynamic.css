@@ -1,0 +1,17 @@
+/*--- css styles applied at/during application runtime ---*/
+
+.header-container-custom[data-current-view=article] {
+  display: none;
+}
+
+.content-container.content-container-custom[data-current-view=article] {
+  margin-top: 0px;
+}
+
+header.header-6.header-custom[data-current-view=article] {
+  position: fixed;
+}
+
+article img {
+  width: 100%;
+}

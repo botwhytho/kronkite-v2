@@ -1,0 +1,175 @@
+/*--- alert ---*/
+.alert.alert-app-level.alert-app-level-custom {
+  display: none;
+}
+
+/*--- card ---*/
+.card-header.card-header-custom {
+  background-color: #002358;
+  color: white;
+}
+
+.card-title.card-title-custom {
+  font-size: 20px;
+  font-weight: 200;
+}
+
+.card-title.card-title-custom.video-title {
+    font-weight: 200;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.card-img.card-img-custom {
+  margin-bottom: 10px;
+}
+
+.card-img.card-img-custom > img {
+  border: 5px solid #002358;
+  border-radius: 80px;
+  width: 135px;
+}
+
+.card-text.card-text-custom {
+  font-size: 16px;
+  overflow-wrap: break-word;
+}
+
+
+/*--- content-container ---*/
+
+.article-marquee, .video-marquee {
+  margin: 15px 15px 0px 25px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content-container.content-container-custom {
+  margin-top: 90px;
+}
+
+.header-container-custom[data-current-view=article] {
+  display: none;
+}
+
+.content-container.content-container-custom[data-current-view=article] {
+  margin-top: 0px;
+}
+
+.header-container-custom {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  z-index: 1;
+}
+
+
+/*--- article ---*/
+
+article {
+  padding-left: 25px;
+  padding-right: 10px;
+  text-align: left;
+}
+
+article img {
+  width: 100%;
+}
+
+article article {
+  padding-left: 0px;
+}
+
+header.header-6.header-custom[data-current-view=article] {
+  position: fixed;
+}
+
+.article-headline-custom {
+  font-weight: 300;
+  margin: 15px 20px 10px 0px ;
+}
+
+.content-area.article-view {
+  padding-left: 5px;
+  padding-top: 10px;
+}
+
+
+/*--- icons ---*/
+
+.clr-icon-circle-arrow-left {
+  fill: #fafafa;
+  height: 36px;
+  margin-right: -12px; 
+  width: 36px;
+  transform: rotate(-90deg);
+}
+
+.clr-icon-return-to-home {
+  margin: 10px 0px 0px 15px;
+}
+
+
+
+.btn.btn-link.btn-link-custom {
+  font-size: 14px;
+}
+
+.content-area.content-area-custom {
+  background-color: #f0ebeb;
+}
+
+.row.row-custom {
+  padding: 0px 20px 0px 20px;
+}
+
+section.video-container img {
+  width: 100%;
+  border: 5px solid #002358;
+}
+
+iframe {
+  width: 100%;
+}
+
+video {
+  width: 100%;
+}
+
+
+/*--- media queries ---*/
+
+@media(min-width: 320px) {
+  .content-area.article-view, .content-area.video-view {
+    height: 34em;
+    overflow-y: scroll;
+  }
+}
+
+@media(min-width: 375px) {
+  .content-area.article-view, .content-area.video-view {
+    height: 42em;
+    overflow-y: scroll;
+  }
+}
+
+@media(min-width: 414px) {
+  .content-area.article-view, .content-area.video-view {
+    height: 46em;
+    overflow-y: scroll;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
