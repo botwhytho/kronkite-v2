@@ -3,7 +3,9 @@ module.exports = function (grunt) {
 	require("time-grunt")(grunt);
 
 	grunt.registerTask("STAGE", [
-		"cssmin",
+		"cssmin:pre-audit",
+		"uncss",
+		"cssmin:post-audit",
 		"concat",
 		"copy"
 		]); 

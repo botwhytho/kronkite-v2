@@ -825,7 +825,6 @@ Container.modules["articles-feed"] = function({require, set}) {
 	function start(currentFeed) {
 		Model = require(["constructor-model"]);
 		articlesList = new Model(currentFeed);
-		console.log({articleList: articlesList.getModel()});
 		broadcast.listen(eventList);
 		return;
 	}
@@ -878,7 +877,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 new Container(["*"], function start(APP) {
 	APP.start(["config", "router", "model", "core-events"])({
 		environment: "debug",
-		remoteDebug: true,
+		remoteDebug: false,
 		routeMap: {
 			debug: "http://localhost:8080/",
 			remoteDebug: "http://192.168.254.4:8080/",
