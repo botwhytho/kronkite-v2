@@ -4,7 +4,7 @@
 
 new Container(["*"], function start(APP) {
 	APP.start(["config", "router", "model", "core-events"])({
-		environment: "production",
+		environment: "debug",
 		remoteDebug: false,
 		routeMap: {
 			debug: "http://localhost:8080/",
