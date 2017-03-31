@@ -43,6 +43,19 @@ Container.modules["utils"] = function({require, set}) {
       		};
 	}
 
-	set("utils")({objectExtend});
+	function setCurrentNavLinkOnRefresh(hash) {
+		console.log("current hash is:", hash);
+		var navItems = Array.from(document.querySelectorAll("body a.nav-link"));
+
+		navItems.forEach(function(item) {
+			if (item.getAttribute("href") === hash) {
+				item.classList.add("active");
+			} else {
+				item.classList.remove("active");	
+			}
+		});
+	}
+
+	set("utils")({objectExtend, setCurrentNavLinkOnRefresh});
 	return
 };

@@ -273,7 +273,6 @@ var $$$ = document.querySelectorAll.bind(document)
 
 function navItemControl() {
 	var navItems = Array.from($$$("body a.nav-link"));
-	
 	navItems.forEach(function(item) {
 		item.addEventListener("click", function(e) {
 			navItems.forEach(function(item) {
@@ -773,7 +772,20 @@ Container.modules["utils"] = function({require, set}) {
       		};
 	}
 
-	set("utils")({objectExtend});
+	function setCurrentNavLinkOnRefresh(hash) {
+		console.log("current hash is:", hash);
+		var navItems = Array.from(document.querySelectorAll("body a.nav-link"));
+
+		navItems.forEach(function(item) {
+			if (item.getAttribute("href") === hash) {
+				item.classList.add("active");
+			} else {
+				item.classList.remove("active");	
+			}
+		});
+	}
+
+	set("utils")({objectExtend, setCurrentNavLinkOnRefresh});
 	return
 };
 
@@ -860,6 +872,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 	}
 
 	function start(currentFeed) {
+		require(["utils"]).setCurrentNavLinkOnRefresh(window.location.hash);
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
 		broadcast.listen(eventList);

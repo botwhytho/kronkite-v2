@@ -7,7 +7,6 @@ var $$$ = document.querySelectorAll.bind(document)
 
 function navItemControl() {
 	var navItems = Array.from($$$("body a.nav-link"));
-	
 	navItems.forEach(function(item) {
 		item.addEventListener("click", function(e) {
 			navItems.forEach(function(item) {

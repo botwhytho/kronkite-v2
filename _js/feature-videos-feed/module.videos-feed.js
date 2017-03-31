@@ -26,6 +26,7 @@ Container.modules["videos-feed"] = function({require, set}) {
 	}
 
 	function start(currentFeed) {
+		require(["utils"]).setCurrentNavLinkOnRefresh(window.location.hash);
 		Model = require(["constructor-model"]);
 		videosList = new Model(currentFeed);
 		broadcast.listen(eventList);
