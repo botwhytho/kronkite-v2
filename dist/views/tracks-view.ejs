@@ -1,1 +1,53 @@
-<p>tracks view</p>
+<div class="content-area content-area-custom">
+	<% function truncate(string, slicePt) {
+			if(string.length < slicePt) {return string;}
+
+			if (!slicePt) {
+				return `${string.slice(0, 63)}...`
+			} else {
+				return `${string.slice(0, slicePt)}...`
+			}
+			return string;
+    } %>
+	<section class="row row-custom">
+
+		<div class="col-lg-5 col-md-8 col-sm-12 col-xs-12" style="margin-bottom: 35px;">
+			<% data.forEach(function(item, index) { %>
+				
+			<section class="card" style="margin-bottom: 15px;">
+				<div class="card-header card-header-custom"> <%= item.name%> / <%=item.artists[0]%>
+				</div><!-- .card-header -->
+
+				<div class="card-block">
+					<div class="card-title card-title-custom video-title"><%=item.album%> </div>
+
+					<div class="card-img card-img-custom">
+						<section class="track-container">
+							<img src="<%=item.album_art[1]["url"]%>">
+						</section>
+					</div>
+
+					<ul class="list-group list-group-flush" style="list-style-type: none;">
+				        <li class="list-group-item">Release Date: <%=item.release_date%></li>
+				        <li class="list-group-item">Popularity: <%=item.popularity%></li>
+    				</ul>
+				</div><!-- .card-block -->
+
+				<div class="card-footer">
+
+					<audio controls>
+					  <source src="<%=item.preview_url%>" type="audio/mpeg">
+					</audio>
+                    
+					<!--<a href="<%=item.preview_url%>"> <button class="btn btn-sm">Play/Pause</button></a>-->
+					<span style="float: right; font-weight: 600;"></span>
+				</div>
+
+			</section><!-- .card -->
+			<% }) %>
+
+		</div>
+
+	</section><!-- .row -->
+
+</div><!-- .content-area -->

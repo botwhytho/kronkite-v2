@@ -63,6 +63,12 @@ function fetchFeed(feedType) {
 			},
 		videos: function({data}) {
 				return data;
+			},
+		music: function({data}) {
+				data.forEach(function(item) {
+					console.log(item.album_art[1].url);
+				});
+				return data;
 			}
 	},
 	checkHasFeed = `check-has-${feedType}-feed`;

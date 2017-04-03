@@ -49,6 +49,11 @@ article img {
   }
 }
 
+section.track-container img {
+  width: 85%;
+  border: 5px solid #002358;
+}
+
 .spinner-container {
   background: transparent;
   margin-top: 15px;

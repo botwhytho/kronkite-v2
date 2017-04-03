@@ -242,7 +242,6 @@ Container.modules.broadcast = function({require, set}) {
 
 	function sendNotifications(data) {
 		return function(resultObj, eventName) {
-			console.log({eventName});
 			resultObj[eventName] = this[eventName](data);
 			return resultObj;
 		}
@@ -307,7 +306,6 @@ broadcast = require(["broadcast"]);
 
 function pushEvent(event) {
 	return function(data) {
-		console.log({event, data});
 		return broadcast.notify([event])(data)[event];
 	}
 }
@@ -363,6 +361,12 @@ function fetchFeed(feedType) {
 				return data.rss.channel[0].item;
 			},
 		videos: function({data}) {
+				return data;
+			},
+		music: function({data}) {
+				data.forEach(function(item) {
+					console.log(item.album_art[1].url);
+				});
 				return data;
 			}
 	},
@@ -467,7 +471,6 @@ var routeTable = [
 			return require(["resolve-map"]).fetchFeed("music");
 		}, 
 		controller: function(modules, data) {
-			console.log("controller!")
 			require(["start"])(["music-feed"])(data);
 		}
 	}];
