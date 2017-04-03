@@ -242,6 +242,7 @@ Container.modules.broadcast = function({require, set}) {
 
 	function sendNotifications(data) {
 		return function(resultObj, eventName) {
+			console.log({eventName});
 			resultObj[eventName] = this[eventName](data);
 			return resultObj;
 		}
@@ -306,6 +307,7 @@ broadcast = require(["broadcast"]);
 
 function pushEvent(event) {
 	return function(data) {
+		console.log({event, data});
 		return broadcast.notify([event])(data)[event];
 	}
 }
@@ -453,8 +455,22 @@ var routeTable = [
 		controller: function(data) {
 
 		}
-	}
-];
+	},
+	{
+		path: "/music",
+		templateFilePath: "tracks-view.ejs",
+		middleware: function() {
+			require(["router-middleware"])["/music"]();
+			window.scrollTo(0,0);
+		},
+		resolve: function() {
+			return require(["resolve-map"]).fetchFeed("music");
+		}, 
+		controller: function(modules, data) {
+			console.log("controller!")
+			require(["start"])(["music-feed"])(data);
+		}
+	}];
 
 set("route-table")(routeTable);
 return;
@@ -503,6 +519,10 @@ routeMap = {
 		return;
 	},
 	"/videos": function() {
+		showHideHeaderBarChrome("show");
+		return;
+	},
+	"/music": function() {
 		showHideHeaderBarChrome("show");
 		return;
 	}
@@ -773,7 +793,6 @@ Container.modules["utils"] = function({require, set}) {
 	}
 
 	function setCurrentNavLinkOnRefresh(hash) {
-		console.log("current hash is:", hash);
 		var navItems = Array.from(document.querySelectorAll("body a.nav-link"));
 
 		navItems.forEach(function(item) {
@@ -883,6 +902,46 @@ Container.modules["videos-feed"] = function({require, set}) {
 	return {moduleName: "videos-feed", startFn: start};
 };
 
+
+/*--- module.music-feed.js ---*/
+
+/*globals Container */
+
+Container.modules["music-feed"] = function({require, set}) {
+	var Model,
+	tracksList,
+	broadcast = require(["broadcast"]),
+	eventList = [
+		{event: "check-has-music-feed", action: checkHasFeed},
+		{event: "get-cached-music-feed", action: getCachedFeed},
+		{event: "get-music-feed-item", action: findFeedItem}
+	];
+
+	function findFeedItem(id) {
+		var item = tracksList.getModel()[id];
+		return item;
+	}
+
+	function checkHasFeed(args) {
+		return tracksList.getModel().length !== 0;
+	}
+
+	function getCachedFeed() {
+		return tracksList.getModel();
+	}
+
+	function start(currentFeed) {
+		console.log("starting music feed...", currentFeed);
+		require(["utils"]).setCurrentNavLinkOnRefresh(window.location.hash);
+		Model = require(["constructor-model"]);
+		tracksList = new Model(currentFeed);
+		broadcast.listen(eventList);
+		window.scrollTo(0,0);
+		return;
+	}
+
+	return {moduleName: "music-feed", startFn: start};
+};
 /*--- start.js ---*/
 
 /* globals Container */

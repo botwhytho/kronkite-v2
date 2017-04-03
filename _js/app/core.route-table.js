@@ -57,8 +57,21 @@ var routeTable = [
 		controller: function(data) {
 
 		}
-	}
-];
+	},
+	{
+		path: "/music",
+		templateFilePath: "tracks-view.ejs",
+		middleware: function() {
+			require(["router-middleware"])["/music"]();
+			window.scrollTo(0,0);
+		},
+		resolve: function() {
+			return require(["resolve-map"]).fetchFeed("music");
+		}, 
+		controller: function(modules, data) {
+			require(["start"])(["music-feed"])(data);
+		}
+	}];
 
 set("route-table")(routeTable);
 return;

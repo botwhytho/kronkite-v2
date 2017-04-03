@@ -43,6 +43,10 @@ routeMap = {
 	"/videos": function() {
 		showHideHeaderBarChrome("show");
 		return;
+	},
+	"/music": function() {
+		showHideHeaderBarChrome("show");
+		return;
 	}
 };
 
