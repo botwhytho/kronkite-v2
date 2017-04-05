@@ -364,9 +364,6 @@ function fetchFeed(feedType) {
 				return data;
 			},
 		music: function({data}) {
-				data.forEach(function(item) {
-					console.log(item.album_art[1].url);
-				});
 				return data;
 			}
 	},
@@ -934,10 +931,10 @@ Container.modules["music-feed"] = function({require, set}) {
 	}
 
 	function start(currentFeed) {
-		console.log("starting music feed...", currentFeed);
 		require(["utils"]).setCurrentNavLinkOnRefresh(window.location.hash);
 		Model = require(["constructor-model"]);
 		tracksList = new Model(currentFeed);
+		//require(["start"])(["player"])(tracksList);
 		broadcast.listen(eventList);
 		window.scrollTo(0,0);
 		return;
@@ -945,6 +942,54 @@ Container.modules["music-feed"] = function({require, set}) {
 
 	return {moduleName: "music-feed", startFn: start};
 };
+
+/*--- module.player.js ---*/
+
+/*globals Container */
+
+Container.modules["player"] = function({require, set}) {
+	var templateContainer = document.querySelector("#template-container"),
+	loadedTracks = {},
+	currentTrack;
+
+	function addTrack({trackId, currentTrack}) {
+		loadedTracks[trackId] = currentTrack;
+		return;
+	}
+
+	function checkPauseState() {
+		return currentTrack.paused
+	}
+
+	function createTrack(trackId) {
+		return function(playlist) {
+			try { 
+				currentTrack.pause() 
+				console.log(currentTrack.paused);
+
+			} catch(e) {
+				currentTrack = new Audio(playlist[trackId].preview_url);
+				addTrack({trackId, currentTrack});
+				currentTrack.play();
+			}
+		}
+	}
+
+	function onClickPlayButton(playlist) {
+		return function({target}) {
+			if (target.dataset.trackId) {
+				createTrack(target.dataset.trackId)(playlist);
+			}
+		}
+	}
+
+	function start(playlist) {
+		templateContainer.addEventListener("click", onClickPlayButton(playlist.getModel()));
+		return;
+	}
+
+	return {moduleName: "player", startFn: start};
+}; 
 /*--- start.js ---*/
 
 /* globals Container */

@@ -54,6 +54,15 @@ section.track-container img {
   border: 5px solid #002358;
 }
 
+.progress-bar {
+  background-color: #007cbb;
+  bottom: 61px;
+  height: 5px;
+  margin-bottom: -10px;
+  position: absolute;
+  width: 100%;
+}
+
 .spinner-container {
   background: transparent;
   margin-top: 15px;
@@ -94,4 +103,22 @@ section.track-container img {
   border-top-color: #E27314;
   height: 28px;
   width: 28px;
+}
+
+audio::-webkit-media-controls-panel {
+  background-color: #fff;
+}
+
+audio::-webkit-media-controls-play-button {
+  width: 65px;
+  height: 65px;
+}
+
+audio {
+  width: 100%;
+}
+
+.card-footer svg {
+  width: 24px;
+  fill: blue;
 }

@@ -26,7 +26,6 @@ Container.modules["music-feed"] = function({require, set}) {
 	}
 
 	function start(currentFeed) {
-		console.log("starting music feed...", currentFeed);
 		require(["utils"]).setCurrentNavLinkOnRefresh(window.location.hash);
 		Model = require(["constructor-model"]);
 		tracksList = new Model(currentFeed);

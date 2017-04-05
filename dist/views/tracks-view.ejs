@@ -27,19 +27,21 @@
 						</section>
 					</div>
 
-					<ul class="list-group list-group-flush" style="list-style-type: none;">
-				        <li class="list-group-item">Release Date: <%=item.release_date%></li>
-				        <li class="list-group-item">Popularity: <%=item.popularity%></li>
+					<ul class="" style="list-style-type: none;">
+				        <li class="">Release Date: <%=item.release_date%></li>
+				        <li class="">Popularity: <%=item.popularity%></li>
     				</ul>
 				</div><!-- .card-block -->
-
-				<div class="card-footer">
-
-					<audio controls>
-					  <source src="<%=item.preview_url%>" type="audio/mpeg">
-					</audio>
-                    
-					<!--<a href="<%=item.preview_url%>"> <button class="btn btn-sm">Play/Pause</button></a>-->
+			
+				<div class="card-footer" style="padding-top: 0px; padding-bottom: 0px;">
+					<div style="background-color: #fff; height: 40px; 
+  						position: absolute;
+  						right: 32px;
+  						width: 70px;
+  						z-index: 1;"></div>
+					
+					<audio src="<%=item.preview_url%>" controls></audio>
+					<!--<button data-track-id="<%=index%>" class="btn btn-sm">Play/Pause</button>-->
 					<span style="float: right; font-weight: 600;"></span>
 				</div>
 

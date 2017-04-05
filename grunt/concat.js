@@ -5,6 +5,7 @@ module.exports = {
                 	"./_js/feature-articles-feed/**", 
                 	"./_js/feature-videos-feed/**", 
                 	"./_js/feature-music-feed/**",
+                        "./_js/feature-audio-player/**",
                 	"./_js/start.js" 
                 ],
                 dest: "./dist/js/kronkite.js"
