@@ -11,5 +11,5 @@ In lieu of a large opinionated framework v2 uses the Sandbox pattern as well as 
 
 This project is part of an exploration in distributed systems. The backend supporting v2 encompasses separate services written in Ruby/Sinatra and Node.js/Express communication via HTTP/REST with the client-side code. 
 
-For a more thorough explanaton of the backend supporting this app please see the [README](https://github.com/seanttaylor/kronkite-sever) for the kronkite-server repository.
+For a more thorough explanaton of the backend supporting this app please see the [README](https://github.com/seanttaylor/kronkite-server) for the kronkite-server repository.
 
