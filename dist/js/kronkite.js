@@ -999,7 +999,7 @@ new Container(["*"], function start(APP) {
 		environment: "debug",
 		remoteDebug: false,
 		routeMap: {
-			debug: "http://localhost:8080/",
+			debug: "http://localhost:8888/api/",
 			remoteDebug: "http://192.168.254.4:8080/",
 			production: "https://kronkite-server.herokuapp.com/"
 		}	
